@@ -5,13 +5,13 @@ import com.mitek.tree.config.Constants;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,8 +20,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Capture.Config.class)
 public class Capture extends SingleOutcomeNode {
 
-
-    private Logger logger = LoggerFactory.getLogger(Capture.class);
     private static Logger utilDebug = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
@@ -47,11 +45,12 @@ public class Capture extends SingleOutcomeNode {
 
     @Override
     public Action process(TreeContext context) {
+        JsonValue sharedState = context.sharedState;
         if (context.hasCallbacks()) {
             String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
             utilDebug.debug("*********imageData**********" + imageData);
-
-            return goToNext().build();
+            sharedState.add("imageRef",imageData);
+            return goToNext().replaceSharedState(sharedState).build();
         }
 
         return buildCallbacks(context);

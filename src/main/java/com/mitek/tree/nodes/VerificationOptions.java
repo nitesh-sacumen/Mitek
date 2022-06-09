@@ -48,7 +48,7 @@ public class VerificationOptions extends SingleOutcomeNode {
         try {
             logger.info("Collecting Verification Options");
             String[] choices = {"Selfie", "Passport", "Driving Licence"};
-            ChoiceCallback verificationOptions = new ChoiceCallback("Please select one verification option", choices, 0, false);
+            ChoiceCallback verificationOptions = new ChoiceCallback("What type of document would you like to submit?", choices, 0, false);
             cbList.add(verificationOptions);
         } catch (Exception e) {
             System.out.println(e.getMessage());
