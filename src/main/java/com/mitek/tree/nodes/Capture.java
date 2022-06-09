@@ -2,14 +2,15 @@ package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
+import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
+import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ public class Capture extends SingleOutcomeNode {
 
 
     private Logger logger = LoggerFactory.getLogger(Capture.class);
+    private static Logger utilDebug = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
      * Configuration for the node.
@@ -33,42 +35,33 @@ public class Capture extends SingleOutcomeNode {
     public Capture() {
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
-    private Action collectRegField(TreeContext context) {
-        try {
-            logger.info("Capturing verification details.");
-            NodeState sharedState = context.getStateFor(this);
-            String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
-
-            TextOutputCallback textOutputCallback=new TextOutputCallback(0,"You have selected "+ verificationChoice+" as your verification method. Please click on auto capture button");
-            cbList.add(textOutputCallback);
-            ScriptTextOutputCallback scb = new ScriptTextOutputCallback(getAuthDataScript("/mitek/p1.js", verificationChoice));
-            cbList.add(scb);
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-
-
-        return send(ImmutableList.copyOf(cbList)).build();
+    private Action buildCallbacks(TreeContext context) {
+        NodeState sharedState = context.getStateFor(this);
+        String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
+        return send(new ArrayList<Callback>() {{
+            add(new ScriptTextOutputCallback(getAuthDataScript("/mitek/p1.js", verificationChoice)));
+            add(new HiddenValueCallback("imageURL"));
+        }}).build();
     }
 
     @Override
     public Action process(TreeContext context) {
+        if (context.hasCallbacks()) {
+            String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
+            utilDebug.debug("*********imageData**********" + imageData);
 
-        if (!context.getCallback(ScriptTextOutputCallback.class).isEmpty()) {
             return goToNext().build();
-        } else {
-            return collectRegField(context);
         }
+
+        return buildCallbacks(context);
+
     }
 
     private String getAuthDataScript(String scriptURL, String verificationChoice) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
-                "    var scriptTag = document.createElement('script');\r\n" + "    scriptTag.src = url;\r\n" +
-                "    scriptTag.onload = implementationCode;\r\n" +
-                "    scriptTag.onreadystatechange = implementationCode;\r\n" +
+                "    var scriptTag = document.createElement('script');\r\n" +
+                "    scriptTag.src = url;\r\n" +
                 " var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
@@ -82,7 +75,18 @@ public class Capture extends SingleOutcomeNode {
                 "input.setAttribute('value','" + verificationChoice + "');\r\n" +
 
                 "document.body.appendChild(input);\r\n" +
+                "setTimeout(function(){\n" +
+                "var imageData = document.getElementById('capturedImage').src;\n" +
+                "console.log('-----------------image',imageData);\n" +
+                "document.getElementById('imageURL').value=imageData;\n" +
+                "}, 25000);\r\n" +
                 "var yourCodeToBeCalled = function(){\r\n" +
+                "var imageData = document.getElementById('capturedImage').src;\n" +
+                "console.log('-----------------image',imageData);\n" +
+                "document.getElementById('imageURL').value=imageData;\n" +
                 "}\r\n" + "loadJS(" + "\"" + scriptURL + "\"" + ", yourCodeToBeCalled, document.body);";
+
     }
+
+
 }

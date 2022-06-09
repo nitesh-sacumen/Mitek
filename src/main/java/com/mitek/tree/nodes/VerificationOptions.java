@@ -1,12 +1,16 @@
 package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
+import com.google.inject.Provider;
+import com.google.inject.assistedinject.Assisted;
+import com.iplanet.sso.SSOToken;
 import com.mitek.tree.config.Constants;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
 import org.forgerock.openam.auth.node.api.SingleOutcomeNode;
 import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.openam.identity.idm.IdentityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +18,7 @@ import javax.inject.Inject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.ChoiceCallback;
 import javax.security.auth.callback.TextOutputCallback;
+import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
