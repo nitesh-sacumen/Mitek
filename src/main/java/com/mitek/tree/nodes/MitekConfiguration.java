@@ -2,6 +2,7 @@ package com.mitek.tree.nodes;
 
 import com.google.inject.assistedinject.Assisted;
 import com.mitek.tree.config.Constants;
+import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.annotations.sm.Attribute;
 import org.forgerock.openam.auth.node.api.*;
@@ -17,7 +18,7 @@ import javax.inject.Inject;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = MitekConfiguration.Config.class)
 public class MitekConfiguration extends SingleOutcomeNode {
-    private Logger logger = LoggerFactory.getLogger(MitekConfiguration.class);
+    private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
     private final Config config;
 
     /**
@@ -36,6 +37,10 @@ public class MitekConfiguration extends SingleOutcomeNode {
         @Attribute(order = 400, requiredValue = true)
         String scope();
 
+        @Attribute(order = 500, requiredValue = true)
+        String grantType();
+
+
     }
 
     /**
@@ -50,10 +55,16 @@ public class MitekConfiguration extends SingleOutcomeNode {
     public Action process(TreeContext context) throws NodeProcessException {
         logger.info("Collecting and storing Prove Api input in shared state");
         JsonValue sharedState = context.sharedState;
+        if (config.apiUrl() == null || config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
+            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
+            System.out.println("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
+            return null;
+        }
         sharedState.put(Constants.API_URL, config.apiUrl());
         sharedState.put(Constants.CLIENT_ID, config.clientId());
         sharedState.put(Constants.CLIENT_SECRET, config.clientSecret());
         sharedState.put(Constants.SCOPE, config.scope());
+        sharedState.put(Constants.GRANT_TYPE, config.grantType());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 
