@@ -15,9 +15,18 @@ public final class Constants {
     public static final String CLIENT_ID = "client_id";
     public static final String CLIENT_SECRET = "client_secret";
     public static final String SCOPE = "scope";
+    public static final String GRANT_TYPE = "grant_type";
 
     public static final String VERIFICATION_CHOICE = "verification_choice";
 
     public static final String TEMP = "temp";
+    public static final String CAPTURED_IMAGE = "captured_image";
+    public static final String API_TOKEN_URL = "/connect/token";
+    public static final String API_PASSPORT_URL = "/api/verify/v2/dossier";
+    public static final String BASE_64_STRING = "base_64_string";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String IS_VERIFICATION_REFRESH = "is_verification_refresh";
+    public static final String IS_CAPTURE_REFRESH = "is_capture_refresh";
+
 
 }
