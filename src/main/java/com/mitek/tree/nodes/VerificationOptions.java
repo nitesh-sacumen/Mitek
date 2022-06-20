@@ -1,24 +1,18 @@
 package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Provider;
-import com.google.inject.assistedinject.Assisted;
-import com.iplanet.sso.SSOToken;
 import com.mitek.tree.config.Constants;
+import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
+import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openam.auth.node.api.Action;
-import org.forgerock.openam.auth.node.api.Node;
-import org.forgerock.openam.auth.node.api.SingleOutcomeNode;
-import org.forgerock.openam.auth.node.api.TreeContext;
-import org.forgerock.openam.identity.idm.IdentityUtils;
+import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.ChoiceCallback;
-import javax.security.auth.callback.TextOutputCallback;
-import java.security.PrivilegedAction;
+import javax.security.auth.callback.ConfirmationCallback;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +23,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationOptions extends SingleOutcomeNode {
 
 
-    private Logger logger = LoggerFactory.getLogger(VerificationOptions.class);
+    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
      * Configuration for the node.
@@ -42,26 +36,44 @@ public class VerificationOptions extends SingleOutcomeNode {
     public VerificationOptions() {
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
-    private Action collectRegField(TreeContext context) {
+    private Action collectRegField(TreeContext context, Boolean isVerificationOptionsRefresh) {
+        logger.debug("Collecting Verification Options");
+        List<Callback> cbList = new ArrayList<>();
         try {
-            logger.info("Collecting Verification Options");
             String[] choices = {"Selfie", "Passport", "Driving Licence"};
-            ChoiceCallback verificationOptions = new ChoiceCallback("What type of document would you like to submit?", choices, 0, false);
+            ChoiceCallback verificationOptions = new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false);
             cbList.add(verificationOptions);
+
+            String[] submitButton = {"Submit"};
+            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
+            cbList.add(confirmationCallback);
+
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
+            e.printStackTrace();
         }
-
-
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
     @Override
-    public Action process(TreeContext context) {
+    public Action process(TreeContext context) throws NodeProcessException {
         try {
+            JsonValue sharedState = context.sharedState;
+            Boolean isVerificationOptionsRefresh = false;
+
+            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
+                isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
+                if (isVerificationOptionsRefresh == true) {
+                    System.out.println("v1");
+                    sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
+                    return buildCallbacks();
+                }
+            }
+
+
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
+                System.out.println("v1");
                 Integer selectedIndex = Arrays.stream(context.getCallback(ChoiceCallback.class).get().getSelectedIndexes()).findFirst().getAsInt();
 
                 String selectedValue;
@@ -75,20 +87,37 @@ public class VerificationOptions extends SingleOutcomeNode {
                     case 2:
                         selectedValue = "DRIVING LICENCE";
                         break;
-
                     default:
-                        selectedValue = "Invalid";
+                        logger.debug("No option selected/Invalid option. Please try again.");
+                        System.out.println("No option selected/Invalid option. Please try again.");
+                        return null;
                 }
-                JsonValue sharedState = context.sharedState;
                 sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                 return goToNext().build();
             } else {
-                return collectRegField(context);
+                return collectRegField(context, isVerificationOptionsRefresh);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            throw new NodeProcessException("Exception is: " + e);
         }
-        return null;
+    }
+
+    private Action buildCallbacks() {
+        return send(new ArrayList<>() {{
+            add(new ScriptTextOutputCallback(getAuthDataScript()));
+        }}).build();
+
+    }
+
+    private String getAuthDataScript() {
+        return "document.getElementById('integratorDocTypeInput').remove();\n" +
+                "document.getElementById('mitekScript').remove();\n" +
+                "document.getElementById('uiContainer').remove();\n" +
+                "document.getElementById('mitekMediaContainer').remove();\n" +
+                "document.getElementById('parentDiv').remove();\n" +
+                "document.getElementById('loginButton_0').click();";
     }
 
 }
