@@ -1,10 +1,8 @@
 package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
-import org.forgerock.openam.auth.node.api.Action;
-import org.forgerock.openam.auth.node.api.Node;
-import org.forgerock.openam.auth.node.api.SingleOutcomeNode;
-import org.forgerock.openam.auth.node.api.TreeContext;
+import com.sun.identity.authentication.client.AuthClientUtils;
+import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +19,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Consent extends SingleOutcomeNode {
 
 
-    private Logger logger = LoggerFactory.getLogger(Consent.class);
+    private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
      * Configuration for the node.
@@ -73,12 +71,20 @@ public class Consent extends SingleOutcomeNode {
     }
 
     @Override
-    public Action process(TreeContext context) {
-        if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {
+    public Action process(TreeContext context) throws NodeProcessException {
+        logger.debug("*********************Capture node********************");
+        System.out.println("*********************Capture node********************");
+        try {
 
-            return goToNext().build();
-        } else {
-            return collectRegField(context);
+            if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {
+                return goToNext().build();
+            } else {
+                return collectRegField(context);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            throw new NodeProcessException("Exception is: " + e);
         }
     }
 }
