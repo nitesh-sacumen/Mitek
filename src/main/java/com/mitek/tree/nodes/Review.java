@@ -145,8 +145,8 @@ public class Review implements Node {
                         httpPost.setEntity(stringEntity);
 
                         response = httpclient.execute(httpPost);
-
-                        logger.debug("verify api token response code: " + response.getStatusLine().getStatusCode());
+                        responseCode = response.getStatusLine().getStatusCode();
+                        logger.debug("verify api token response code: " + responseCode);
 
                         entityResponse = response.getEntity();
                         result = EntityUtils.toString(entityResponse);
@@ -164,7 +164,9 @@ public class Review implements Node {
                                 logger.debug("passport authentication status is:: " + isAuthenticated);
                                 System.out.println("passport authentication status is:: " + isAuthenticated);
                             }
-                        } else if (jsonResponse.has("statusCode")) {
+                        }
+                        //408 Request Timeout/ 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
+                        else if (responseCode == 408 || responseCode == 500 || responseCode == 502 || responseCode == 503 || responseCode == 504) {
                             logger.debug("passport authentication status is:: Retry");
                             System.out.println("passport authentication status is:: Retry");
                             sharedState.put("verification_result", "Retry");
@@ -254,7 +256,7 @@ public class Review implements Node {
                 "buttonDiv.appendChild(button)\n;" +
                 "buttonDiv.appendChild(button1)\n;" +
                 "parentDiv.appendChild(div);\n" +
-                "parentDiv.appendChild(buttonDiv);\n"+
+                "parentDiv.appendChild(buttonDiv);\n" +
                 "document.body.appendChild(parentDiv);\n";
     }
 
