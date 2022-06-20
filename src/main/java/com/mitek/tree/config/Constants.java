@@ -27,6 +27,13 @@ public final class Constants {
     public static final String ACCESS_TOKEN = "access_token";
     public static final String IS_VERIFICATION_REFRESH = "is_verification_refresh";
     public static final String IS_CAPTURE_REFRESH = "is_capture_refresh";
+    public static final String VERIFICATION_RESULT = "verification_result";
+
+    public static final String VERIFICATION_SUCCESS = "verification_success";
+    public static final String VERIFICATION_FAILURE = "verification_failure";
+    public static final String VERIFICATION_RETRY = "verification_retry";
+    public static final String VERIFICATION_TIMEOUT = "verification_timeout";
+    public static final String CAPTURE_RESULT = "capture_result";
 
 
 }

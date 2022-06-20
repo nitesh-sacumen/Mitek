@@ -1,12 +1,10 @@
 package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
+import com.mitek.tree.config.Constants;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
-import org.forgerock.openam.auth.node.api.Action;
-import org.forgerock.openam.auth.node.api.Node;
-import org.forgerock.openam.auth.node.api.OutcomeProvider;
-import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.openam.auth.node.api.*;
 import org.forgerock.util.i18n.PreferredLocales;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,26 +31,32 @@ public class VerificationOutcome implements Node {
 
 
     @Override
-    public Action process(TreeContext context) {
+    public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationOutcome node********************");
         System.out.println("*********************VerificationOutcome node********************");
-        JsonValue sharedState = context.sharedState;
-        String verification_result = sharedState.get("verification_result").asString();
-        logger.info("Verification result" + verification_result);
-        System.out.println("Verification result" + verification_result);
+        try {
+            JsonValue sharedState = context.sharedState;
+            String verification_result = sharedState.get(Constants.VERIFICATION_RESULT).asString();
+            logger.info("Verification result" + verification_result);
+            System.out.println("Verification result" + verification_result);
 
-        if (verification_result.equalsIgnoreCase("Success")) {
-            System.out.println("success");
-            return goTo(MitekOutcome.SUCCESS).replaceSharedState(sharedState).build();
-        } else if (verification_result.equalsIgnoreCase("Failure")) {
-            System.out.println("failure");
-            return goTo(MitekOutcome.FAILURE).replaceSharedState(sharedState).build();
-        } else if (verification_result.equalsIgnoreCase("Retry")) {
-            System.out.println("retry");
-            return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-        } else {
-            System.out.println("inprogress");
-            return goTo(MitekOutcome.INPROGRESS).replaceSharedState(sharedState).build();
+            if (verification_result == Constants.VERIFICATION_SUCCESS) {
+                System.out.println("success");
+                return goTo(MitekOutcome.SUCCESS).replaceSharedState(sharedState).build();
+            } else if (verification_result == Constants.VERIFICATION_FAILURE) {
+                System.out.println("failure");
+                return goTo(MitekOutcome.FAILURE).replaceSharedState(sharedState).build();
+            } else if (verification_result == Constants.VERIFICATION_RETRY) {
+                System.out.println("retry");
+                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
+            } else {
+                System.out.println("stepUp/timeout");
+                return goTo(MitekOutcome.STEP_UP).replaceSharedState(sharedState).build();
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            e.printStackTrace();
+            throw new NodeProcessException("Exception is: " + e);
         }
     }
 
@@ -79,9 +83,9 @@ public class VerificationOutcome implements Node {
         RETRY,
 
         /**
-         * selection for INPROGRESS.
+         * selection for STEP_UP.
          */
-        INPROGRESS,
+        STEP_UP,
 
     }
 
@@ -96,7 +100,7 @@ public class VerificationOutcome implements Node {
             return ImmutableList.of(new Outcome(MitekOutcome.SUCCESS.name(), bundle.getString("successOutcome")),
                     new Outcome(MitekOutcome.FAILURE.name(), bundle.getString("failureOutcome")),
                     new Outcome(MitekOutcome.RETRY.name(), bundle.getString("retryOutcome")),
-                    new Outcome(MitekOutcome.INPROGRESS.name(), bundle.getString("inProgressOutcome")));
+                    new Outcome(MitekOutcome.STEP_UP.name(), bundle.getString("stepUp")));
         }
     }
 }

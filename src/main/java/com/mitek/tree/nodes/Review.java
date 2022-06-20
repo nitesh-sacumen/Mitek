@@ -53,11 +53,12 @@ public class Review implements Node {
         logger.debug("*********************Review node********************");
         System.out.println("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
-        if (sharedState.get("captureResult").isNull()) {//correct this condition else retake is coming without image capturing
+        if (sharedState.get(Constants.CAPTURE_RESULT).isNull()) {//correct this condition else retake is coming without image capturing
             logger.debug("image data is null");
+            System.out.println("image data is null");
             return null;
         }
-        String imageData = sharedState.get("captureResult").asString();
+        String imageData = sharedState.get(Constants.CAPTURE_RESULT).asString();
 
         if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
             String isRetake = context.getCallback(HiddenValueCallback.class).get().getValue();
@@ -145,6 +146,7 @@ public class Review implements Node {
                         httpPost.setEntity(stringEntity);
 
                         response = httpclient.execute(httpPost);
+                        Thread.sleep(30);//delay to handle timeout scenario
                         responseCode = response.getStatusLine().getStatusCode();
                         logger.debug("verify api token response code: " + responseCode);
 
@@ -154,26 +156,30 @@ public class Review implements Node {
                         if (jsonResponse.has("findings")) {
                             JSONObject findings = (JSONObject) jsonResponse.get("findings");
 
-                            if (findings.has("authenticated")) {
+                            if (findings.has("authenticated")) {//authenticated true/false scenario
                                 Boolean isAuthenticated = (Boolean) findings.get("authenticated");
                                 if (isAuthenticated) {
-                                    sharedState.put("verification_result", "Success");
+                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
                                 } else {
-                                    sharedState.put("verification_result", "Failure");
+                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
                                 }
                                 logger.debug("passport authentication status is:: " + isAuthenticated);
                                 System.out.println("passport authentication status is:: " + isAuthenticated);
                             }
                         }
-                        //408 Request Timeout/ 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
-                        else if (responseCode == 408 || responseCode == 500 || responseCode == 502 || responseCode == 503 || responseCode == 504) {
+                        //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
+                        // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
+                        else if (responseCode == 400 || responseCode == 401 || responseCode == 403 ||
+                                responseCode == 408 || responseCode == 415 ||
+                                responseCode == 500 || responseCode == 502 ||
+                                responseCode == 503 || responseCode == 504) {//system error/ retry scenario
                             logger.debug("passport authentication status is:: Retry");
                             System.out.println("passport authentication status is:: Retry");
-                            sharedState.put("verification_result", "Retry");
-                        } else {
-                            logger.debug("passport authentication status is:: InProgress");
-                            System.out.println("passport authentication status is:: InProgress");
-                            sharedState.put("verification_result", "InProgress");
+                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
+                        } else {//timeout scenario
+                            logger.debug("passport authentication status is:: timeout");
+                            System.out.println("passport authentication status is:: timeout");
+                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_TIMEOUT);
                         }
 
 

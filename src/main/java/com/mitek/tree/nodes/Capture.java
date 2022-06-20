@@ -55,7 +55,8 @@ public class Capture extends SingleOutcomeNode {
             System.out.println("into capture has callback");
             String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
             logger.debug("*********imageData**********" + imageData);
-            sharedState.put("captureResult", imageData);
+            System.out.println("image data is"+imageData);
+            sharedState.put(Constants.CAPTURE_RESULT, imageData);
             return goToNext().replaceSharedState(sharedState).build();
         }
         System.out.println("into capture no callback");
