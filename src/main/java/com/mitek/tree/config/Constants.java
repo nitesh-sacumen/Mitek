@@ -34,6 +34,7 @@ public final class Constants {
     public static final String VERIFICATION_RETRY = "verification_retry";
     public static final String VERIFICATION_TIMEOUT = "verification_timeout";
     public static final String CAPTURE_RESULT = "capture_result";
+    public static final String BASE64_STARTS_WITH = "data";
 
 
 }

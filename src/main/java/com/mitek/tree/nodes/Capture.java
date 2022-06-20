@@ -51,11 +51,12 @@ public class Capture extends SingleOutcomeNode {
         String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
         String url = "/mitek/p1.js";
         System.out.println("into capture");
-        if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
+
+        if (context.getCallback(HiddenValueCallback.class).isPresent()) {
             System.out.println("into capture has callback");
             String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
             logger.debug("*********imageData**********" + imageData);
-            System.out.println("image data is"+imageData);
+            System.out.println("image data is" + imageData);
             sharedState.put(Constants.CAPTURE_RESULT, imageData);
             return goToNext().replaceSharedState(sharedState).build();
         }
@@ -75,29 +76,30 @@ public class Capture extends SingleOutcomeNode {
 
     private String getAuthDataScript(String scriptURL, String verificationChoice, Boolean isCaptureRefresh) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
-                "    var scriptTag = document.createElement('script');\r\n" +
+                "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +
-                "    scriptTag.src = url;\r\n" +
-                " var link = document.createElement('link');\r\n" +
+                "scriptTag.src = url;\r\n" +
+                "var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
                 "link.href = '/mitek/style.css';\r\n" +
                 "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +
-
                 "var input = document.createElement('input');\r\n" + "input.setAttribute('type', 'hidden');\r\n" +
-
                 "input.setAttribute('id', 'integratorDocTypeInput');\r\n" +
-
                 "input.setAttribute('value','" + verificationChoice + "');\r\n" +
-
                 "document.body.appendChild(input);\r\n" +
-
-
                 "setTimeout(function(){\n" +
                 "var imageData = document.getElementById('capturedImage').src;\n" +
+                "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
+                "var imageBase64=document.getElementById('captureResponse').value;\n" +
+                "if(result===true){\n" +
                 "document.getElementById('captureResponse').value=imageData;\n" +
+                "}\n" +
+                "else{\n" +
+                "document.getElementById('captureResponse').value='';\n" +
+                "}\n" +
                 "document.getElementById('loginButton_0').click();" +
                 "}, 15000);\r\n" +
                 "var yourCodeToBeCalled = function(){\r\n" +

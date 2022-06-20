@@ -53,10 +53,10 @@ public class Review implements Node {
         logger.debug("*********************Review node********************");
         System.out.println("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
-        if (sharedState.get(Constants.CAPTURE_RESULT).isNull()) {//correct this condition else retake is coming without image capturing
-            logger.debug("image data is null");
-            System.out.println("image data is null");
-            return null;
+        if (!sharedState.get(Constants.CAPTURE_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
+            logger.debug("image data is null/timeout");
+            System.out.println("image data is null/timeout");
+            return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
         }
         String imageData = sharedState.get(Constants.CAPTURE_RESULT).asString();
 
@@ -209,35 +209,25 @@ public class Review implements Node {
 
     private String getAuthDataScript(String imageData) {
         return "document.getElementById('loginButton_0').style.display='none';\n" +
-                "document.getElementById('autoCaptureDiv').remove();\n" +
+                "document.getElementById('integratorAutoCaptureButton').remove();\n" +
                 "document.getElementById('integratorManualCaptureButton').remove();\n" +
 
                 "var parentDiv=document.createElement('div');\n" +
                 "parentDiv.id='parentDiv';\n" +
                 "parentDiv.className='float-container';\n" +
                 "parentDiv.style.marginTop='-20%';\n" +
-                //"parentDiv.style.height='100%';\n" +
                 "parentDiv.style.overflow='hidden';\n" +
-
                 "var div=document.createElement('div');\n" +
                 "div.id='imageContainer';\n" +
                 "div.className='float-child-left';\n" +
-
                 "var buttonDiv=document.createElement('div');\n" +
                 "buttonDiv.id='buttonContainer';\n" +
                 "buttonDiv.className='float-child-right';\n" +
-
-                //"buttonDiv.style.height='25%';\n" +
-
-
                 "var img = document.createElement('img');\n" +
                 "img.id='previewImage';\n" +
                 "img.style.width='100%';\n" +
                 "img.style.height='auto';\n" +
-
                 "img.src = " + "'" + imageData + "'\n" +
-
-
                 "var button = document.createElement('button');\n" +
                 "button.id = 'captureRetake';\n" +
                 "button.innerHTML = 'Retake'\n" +
@@ -247,8 +237,6 @@ public class Review implements Node {
                 "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "document.getElementById('loginButton_0').click();\n" +
                 "};\n" +
-
-
                 "var button1 = document.createElement('button');\n" +
                 "button1.id = 'captureSubmit';\n" +
                 "button1.innerHTML = 'Submit'\n" +
@@ -257,7 +245,6 @@ public class Review implements Node {
                 "document.getElementById('isRetake').value = 'false'\n" +
                 "document.getElementById('loginButton_0').click();\n" +
                 "};\n" +
-
                 "div.appendChild(img);" +
                 "buttonDiv.appendChild(button)\n;" +
                 "buttonDiv.appendChild(button1)\n;" +
