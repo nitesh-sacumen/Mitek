@@ -33,7 +33,6 @@ public class VerificationOutcome implements Node {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationOutcome node********************");
-        System.out.println("*********************VerificationOutcome node********************");
         try {
             JsonValue sharedState = context.sharedState;
             String verification_result = sharedState.get(Constants.VERIFICATION_RESULT).asString();

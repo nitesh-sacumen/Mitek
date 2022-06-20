@@ -51,7 +51,6 @@ public class Review implements Node {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Review node********************");
-        System.out.println("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
         if (!sharedState.get(Constants.CAPTURE_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
             logger.debug("image data is null/timeout");

@@ -53,7 +53,6 @@ public class MitekConfiguration extends SingleOutcomeNode {
 
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
-        logger.info("Collecting and storing Prove Api input in shared state");
         JsonValue sharedState = context.sharedState;
         if (config.apiUrl() == null || config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
             logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");

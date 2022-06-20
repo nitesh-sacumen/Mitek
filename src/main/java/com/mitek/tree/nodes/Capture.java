@@ -50,18 +50,12 @@ public class Capture extends SingleOutcomeNode {
 
         String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
         String url = "/mitek/p1.js";
-        System.out.println("into capture");
 
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
-            System.out.println("into capture has callback");
             String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
-            logger.debug("*********imageData**********" + imageData);
-            System.out.println("image data is" + imageData);
             sharedState.put(Constants.CAPTURE_RESULT, imageData);
             return goToNext().replaceSharedState(sharedState).build();
         }
-        System.out.println("into capture no callback");
-        System.out.println("verification is:");
         return buildCallbacks(url, verificationChoice, isCaptureRefresh);
     }
 

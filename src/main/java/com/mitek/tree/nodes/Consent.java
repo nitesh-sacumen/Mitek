@@ -73,7 +73,6 @@ public class Consent extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Capture node********************");
-        System.out.println("*********************Capture node********************");
         try {
 
             if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {

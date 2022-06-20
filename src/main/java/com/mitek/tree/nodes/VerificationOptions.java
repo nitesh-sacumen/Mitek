@@ -59,6 +59,7 @@ public class VerificationOptions extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         try {
+            logger.debug("*********************Verification Options node********************");
             JsonValue sharedState = context.sharedState;
             Boolean isVerificationOptionsRefresh = false;
 
