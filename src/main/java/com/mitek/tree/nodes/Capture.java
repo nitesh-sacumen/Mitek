@@ -84,18 +84,31 @@ public class Capture extends SingleOutcomeNode {
                 "input.setAttribute('id', 'integratorDocTypeInput');\r\n" +
                 "input.setAttribute('value','" + verificationChoice + "');\r\n" +
                 "document.body.appendChild(input);\r\n" +
-                "setTimeout(function(){\n" +
+
+                "var capturedTimeout = document.createElement('input');\n" +
+                "capturedTimeout.id = 'capturedTimeout';\n" +
+                "capturedTimeout.type = 'hidden';\n" +
+                "capturedTimeout.value = '';\n" +
+                "document.body.appendChild(capturedTimeout);\n" +
+
+
+
+                "var interval = setInterval(function () {\n" +
                 "var imageData = document.getElementById('capturedImage').src;\n" +
                 "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
-                "var imageBase64=document.getElementById('captureResponse').value;\n" +
-                "if(result===true){\n" +
-                "document.getElementById('captureResponse').value=imageData;\n" +
+                "if (result === true) {\n" +
+                "document.getElementById('captureResponse').value = imageData;\n" +
+                "f2();\n" +
                 "}\n" +
-                "else{\n" +
-                "document.getElementById('captureResponse').value='';\n" +
+                "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
+                "document.getElementById('captureResponse').value = '';\n" +
+                "f2();\n" +
                 "}\n" +
-                "document.getElementById('loginButton_0').click();" +
-                "}, 15000);\r\n" +
+                "}, 500);\n" +
+                "function f2() {\n" +
+                "clearInterval(interval);\n" +
+                "document.getElementById('loginButton_0').click();\n" +
+                "}\n" +
                 "var yourCodeToBeCalled = function(){\r\n" +
                 "}\r\n" + "loadJS(" + "\"" + scriptURL + "\"" + ", yourCodeToBeCalled, document.body);";
 

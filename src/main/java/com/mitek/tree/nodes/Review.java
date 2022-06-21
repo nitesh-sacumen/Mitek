@@ -55,6 +55,7 @@ public class Review implements Node {
         if (!sharedState.get(Constants.CAPTURE_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
             logger.debug("image data is null/timeout");
             System.out.println("image data is null/timeout");
+            sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
             return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
         }
         String imageData = sharedState.get(Constants.CAPTURE_RESULT).asString();
@@ -138,9 +139,6 @@ public class Review implements Node {
                         httpPost.addHeader("Content-Type", "application/json");
 
                         httpPost.addHeader("Authorization", "Bearer " + accessToken);
-
-                        logger.debug("json-------------" + passportObj);
-
                         stringEntity = new StringEntity(passportObj.toString());
                         httpPost.setEntity(stringEntity);
 
@@ -152,6 +150,8 @@ public class Review implements Node {
                         entityResponse = response.getEntity();
                         result = EntityUtils.toString(entityResponse);
                         jsonResponse = new JSONObject(result);
+
+                        System.out.println(jsonResponse.toString(4));
                         if (jsonResponse.has("findings")) {
                             JSONObject findings = (JSONObject) jsonResponse.get("findings");
 

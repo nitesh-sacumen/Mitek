@@ -115,9 +115,18 @@ public class VerificationOptions extends SingleOutcomeNode {
     private String getAuthDataScript() {
         return "document.getElementById('integratorDocTypeInput').remove();\n" +
                 "document.getElementById('mitekScript').remove();\n" +
+                "document.getElementById('capturedTimeout').remove();\n" +
                 "document.getElementById('uiContainer').remove();\n" +
                 "document.getElementById('mitekMediaContainer').remove();\n" +
+                "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
+                "document.getElementById('integratorAutoCaptureButton').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
+                "document.getElementById('integratorManualCaptureButton').remove();\n" +
+                "}\n" +
                 "document.getElementById('loginButton_0').click();";
     }
 
