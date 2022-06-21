@@ -152,6 +152,13 @@ public class Review implements Node {
                         jsonResponse = new JSONObject(result);
 
                         System.out.println(jsonResponse.toString(4));
+
+                        if (jsonResponse.has("dossierMetadata")) {
+                            JSONObject dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
+                            String referenceId = dossierMetadataObj.get("dossierId").toString();
+                            sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
+                        }
+
                         if (jsonResponse.has("findings")) {
                             JSONObject findings = (JSONObject) jsonResponse.get("findings");
 

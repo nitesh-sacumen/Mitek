@@ -59,7 +59,7 @@ public class Consent extends SingleOutcomeNode {
             TextOutputCallback label6 = new TextOutputCallback(0, "I agree to the terms of the service");
             cbList.add(label6);
 
-            String[] choices = {"Yes", "No"};
+            String[] choices = {"Next"};
             ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
             cbList.add(confirmationCallback);
         } catch (Exception e) {

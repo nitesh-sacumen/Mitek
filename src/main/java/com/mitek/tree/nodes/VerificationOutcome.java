@@ -48,9 +48,13 @@ public class VerificationOutcome implements Node {
             } else if (verification_result == Constants.VERIFICATION_RETRY) {
                 System.out.println("retry");
                 return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-            } else {
-                System.out.println("stepUp/timeout");
-                return goTo(MitekOutcome.STEP_UP).replaceSharedState(sharedState).build();
+            }
+            else if (verification_result == Constants.VERIFICATION_TIMEOUT) {
+                System.out.println("timeout");
+                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
+            }
+            else{
+                return null;
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -81,11 +85,6 @@ public class VerificationOutcome implements Node {
          */
         RETRY,
 
-        /**
-         * selection for STEP_UP.
-         */
-        STEP_UP,
-
     }
 
     /**
@@ -98,8 +97,7 @@ public class VerificationOutcome implements Node {
                     MitekOutcomeProvider.class.getClassLoader());
             return ImmutableList.of(new Outcome(MitekOutcome.SUCCESS.name(), bundle.getString("successOutcome")),
                     new Outcome(MitekOutcome.FAILURE.name(), bundle.getString("failureOutcome")),
-                    new Outcome(MitekOutcome.RETRY.name(), bundle.getString("retryOutcome")),
-                    new Outcome(MitekOutcome.STEP_UP.name(), bundle.getString("stepUp")));
+                    new Outcome(MitekOutcome.RETRY.name(), bundle.getString("retryOutcome")));
         }
     }
 }

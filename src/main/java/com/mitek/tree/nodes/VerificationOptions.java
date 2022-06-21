@@ -45,7 +45,7 @@ public class VerificationOptions extends SingleOutcomeNode {
             ChoiceCallback verificationOptions = new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false);
             cbList.add(verificationOptions);
 
-            String[] submitButton = {"Submit"};
+            String[] submitButton = {"Next"};
             ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
             cbList.add(confirmationCallback);
 
@@ -66,7 +66,6 @@ public class VerificationOptions extends SingleOutcomeNode {
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
                 isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
                 if (isVerificationOptionsRefresh == true) {
-                    System.out.println("v1");
                     sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
                     return buildCallbacks();
                 }
@@ -74,7 +73,6 @@ public class VerificationOptions extends SingleOutcomeNode {
 
 
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
-                System.out.println("v1");
                 Integer selectedIndex = Arrays.stream(context.getCallback(ChoiceCallback.class).get().getSelectedIndexes()).findFirst().getAsInt();
 
                 String selectedValue;
