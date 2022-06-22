@@ -19,6 +19,9 @@ public final class Constants {
 
     public static final String VERIFICATION_CHOICE = "verification_choice";
 
+    public static final String IDENTITY_CHOICE = "identity_choice";
+    public static final String COUNTRY_CHOICE = "country_choice";
+
     public static final String TEMP = "temp";
     public static final String CAPTURED_IMAGE = "captured_image";
     public static final String API_TOKEN_URL = "/connect/token";
@@ -34,6 +37,7 @@ public final class Constants {
     public static final String VERIFICATION_RETRY = "verification_retry";
     public static final String VERIFICATION_TIMEOUT = "verification_timeout";
     public static final String CAPTURE_RESULT = "capture_result";
+    public static final String CAPTURE_FRONT = "capture_front";
     public static final String BASE64_STARTS_WITH = "data";
     public static final String VERIFICATION_REFERENCE_ID = "verification_reference_id";
 
