@@ -63,7 +63,7 @@ public class ID_Verification extends SingleOutcomeNode {
 
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
-        logger.debug("*********************Capture node********************");
+        logger.debug("*********************ID Verification node********************");
         try {
 
             if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {

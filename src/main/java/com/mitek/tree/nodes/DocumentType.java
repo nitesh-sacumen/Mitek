@@ -61,7 +61,7 @@ public class DocumentType extends SingleOutcomeNode{
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         try {
-            logger.debug("*********************Verification Options node********************");
+            logger.debug("*********************Document type********************");
             JsonValue sharedState = context.sharedState;
             Boolean isVerificationOptionsRefresh = false;
 
@@ -78,23 +78,26 @@ public class DocumentType extends SingleOutcomeNode{
                 Integer selectedIDChoice = Arrays.stream(context.getCallbacks(ChoiceCallback.class).get(0).getSelectedIndexes()).findFirst().getAsInt();
                 Integer selectedCountryChoice = Arrays.stream(context.getCallbacks(ChoiceCallback.class).get(0).getSelectedIndexes()).findFirst().getAsInt();
 
+                logger.debug("selectedIDChoice index: "+selectedIDChoice);
+                logger.debug("selectedCountryChoice index: "+selectedCountryChoice);
+
 
                 String selectedIDValue;
                 String selectedCountry;
                 switch (selectedIDChoice) {
                     case 0:
-                        selectedIDValue = "Identification Card";
+                        selectedIDValue = "DOCUMENT";
                         break;
                     case 1:
                         selectedIDValue = "PASSPORT";
                         break;
                     case 2:
-                        selectedIDValue = "DRIVING LICENCE";
+                        selectedIDValue = "DL FRONT";
                         break;
                     default:
-                        logger.debug("No option selected/Invalid option. Please try again.");
-                        System.out.println("No option selected/Invalid option. Please try again.");
-                        return null;
+                        logger.debug("No id option selected/Invalid option. Please try again.");
+                        System.out.println("No id option selected/Invalid option. Please try again.");
+                        selectedIDValue = "Invalid Choice";
                 }
 
                 switch (selectedCountryChoice) {
@@ -106,8 +109,8 @@ public class DocumentType extends SingleOutcomeNode{
                         break;
                     default:
                         logger.debug("No option selected/Invalid option. Please try again.");
-                        System.out.println("No option selected/Invalid option. Please try again.");
-                        return null;
+                        System.out.println("No country option selected/Invalid option. Please try again.");
+                        selectedCountry = "Invalid Country";
                 }
                 sharedState.put(Constants.IDENTITY_CHOICE, selectedIDValue);
                 sharedState.put(Constants.COUNTRY_CHOICE, selectedCountry);

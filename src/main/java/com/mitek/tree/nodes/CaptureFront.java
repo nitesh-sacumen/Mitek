@@ -4,6 +4,7 @@ import com.mitek.tree.config.Constants;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
+import io.reactivex.rxjava3.internal.operators.observable.BlockingObservableIterable;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
@@ -38,7 +39,7 @@ public class CaptureFront extends SingleOutcomeNode {
 
     @Override
     public Action process(TreeContext context) {
-        logger.debug("*********************Capture node********************");
+        logger.debug("*********************Capture front********************");
         JsonValue sharedState = context.sharedState;
         Boolean isCaptureRefresh = false;
         if (sharedState.get(Constants.IS_CAPTURE_REFRESH).isNotNull()) {
@@ -50,6 +51,8 @@ public class CaptureFront extends SingleOutcomeNode {
 
         String countryChoice = sharedState.get(Constants.COUNTRY_CHOICE).asString();
         String identityChoice = sharedState.get(Constants.IDENTITY_CHOICE).asString();
+        logger.debug("countryChoice: "+countryChoice);
+        logger.debug("identityChoice: "+identityChoice);
 
         String url = "/mitek/p1.js";
 
@@ -80,7 +83,7 @@ public class CaptureFront extends SingleOutcomeNode {
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
                 "link.href = '/mitek/style.css';\r\n" +
-                "document.getElementById('loginButton_0').style.display = 'none';\n" +
+                "document.getElementById('loginButton_0').style.display = '';\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +
                 "var input = document.createElement('input');\r\n" + "input.setAttribute('type', 'hidden');\r\n" +
@@ -100,11 +103,11 @@ public class CaptureFront extends SingleOutcomeNode {
                 "var imageData = document.getElementById('capturedImage').src;\n" +
                 "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
                 "if (result === true) {\n" +
-                "document.getElementById('captureResponse').value = imageData;\n" +
+                "document.getElementById('captureFrontResponse').value = imageData;\n" +
                 "f2();\n" +
                 "}\n" +
                 "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
-                "document.getElementById('captureResponse').value = '';\n" +
+                "document.getElementById('captureFrontResponse').value = '';\n" +
                 "f2();\n" +
                 "}\n" +
                 "}, 500);\n" +
