@@ -4,7 +4,6 @@ import com.mitek.tree.config.Constants;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
-import io.reactivex.rxjava3.internal.operators.observable.BlockingObservableIterable;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
@@ -49,10 +48,9 @@ public class CaptureFront extends SingleOutcomeNode {
             }
         }
 
-        String countryChoice = sharedState.get(Constants.COUNTRY_CHOICE).asString();
-        String identityChoice = sharedState.get(Constants.IDENTITY_CHOICE).asString();
-        logger.debug("countryChoice: "+countryChoice);
-        logger.debug("identityChoice: "+identityChoice);
+        String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
+
+        logger.debug("verificationChoice: "+verificationChoice);
 
         String url = "/mitek/p1.js";
 
@@ -61,20 +59,20 @@ public class CaptureFront extends SingleOutcomeNode {
             sharedState.put(Constants.CAPTURE_FRONT, imageData);
             return goToNext().replaceSharedState(sharedState).build();
         }
-        return buildCallbacks(url, identityChoice, countryChoice, isCaptureRefresh);
+        return buildCallbacks(url, verificationChoice, isCaptureRefresh);
     }
 
 
-    private Action buildCallbacks(String url, String identityChoice,String countryChoice, Boolean isCaptureRefresh) {
+    private Action buildCallbacks(String url, String identityChoice, Boolean isCaptureRefresh) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(getAuthDataScript(url, identityChoice, countryChoice,isCaptureRefresh)));
+            add(new ScriptTextOutputCallback(getAuthDataScript(url, identityChoice,isCaptureRefresh)));
             add(new HiddenValueCallback("captureFrontResponse"));
         }}).build();
 
     }
 
-    private String getAuthDataScript(String scriptURL, String identityChoice,String countryChoice, Boolean isCaptureRefresh) {
+    private String getAuthDataScript(String scriptURL, String identityChoice, Boolean isCaptureRefresh) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +
@@ -83,7 +81,7 @@ public class CaptureFront extends SingleOutcomeNode {
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
                 "link.href = '/mitek/style.css';\r\n" +
-                "document.getElementById('loginButton_0').style.display = '';\n" +
+                "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +
                 "var input = document.createElement('input');\r\n" + "input.setAttribute('type', 'hidden');\r\n" +
@@ -96,8 +94,6 @@ public class CaptureFront extends SingleOutcomeNode {
                 "capturedTimeout.type = 'hidden';\n" +
                 "capturedTimeout.value = '';\n" +
                 "document.body.appendChild(capturedTimeout);\n" +
-
-
 
                 "var interval = setInterval(function () {\n" +
                 "var imageData = document.getElementById('capturedImage').src;\n" +

@@ -81,8 +81,6 @@ public class MitekNodePlugin extends AbstractNodeAmPlugin {
                         VerificationSuccess.class,
                         VerificationFailure.class,
                         VerificationRetry.class,
-                        DocumentType.class,
-                        ID_Verification.class,
                         CaptureFront.class
 
                 ));
