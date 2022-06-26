@@ -75,7 +75,7 @@ public class MitekNodePlugin extends AbstractNodeAmPlugin {
                         MitekConfiguration.class,
                         Consent.class,
                         VerificationOptions.class,
-                        Capture.class,
+                        Selfie.class,
                         Review.class,
                         VerificationOutcome.class,
                         VerificationSuccess.class,

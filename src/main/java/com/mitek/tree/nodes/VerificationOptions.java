@@ -41,7 +41,7 @@ public class VerificationOptions extends SingleOutcomeNode {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
         try {
-            String[] choices = {"Selfie", "Passport", "DL/ID"};
+            String[] choices = {"Passport", "DL/ID"};
             ChoiceCallback verificationOptions = new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false);
             cbList.add(verificationOptions);
 
@@ -78,12 +78,9 @@ public class VerificationOptions extends SingleOutcomeNode {
                 String selectedValue;
                 switch (selectedIndex) {
                     case 0:
-                        selectedValue = "SELFIE";
-                        break;
-                    case 1:
                         selectedValue = "PASSPORT";
                         break;
-                    case 2:
+                    case 1:
                         selectedValue = "DOCUMENT";
                         break;
                     default:

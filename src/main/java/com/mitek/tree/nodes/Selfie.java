@@ -18,8 +18,8 @@ import java.util.ArrayList;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
-@Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Capture.Config.class)
-public class Capture extends SingleOutcomeNode {
+@Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Selfie.Config.class)
+public class Selfie extends SingleOutcomeNode {
 
 
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
@@ -32,13 +32,13 @@ public class Capture extends SingleOutcomeNode {
     }
 
     @Inject
-    public Capture() {
+    public Selfie() {
 
     }
 
     @Override
     public Action process(TreeContext context) {
-        logger.debug("*********************Capture node********************");
+        logger.debug("*********************Selfie node********************");
         JsonValue sharedState = context.sharedState;
         Boolean isCaptureRefresh = false;
         if (sharedState.get(Constants.IS_CAPTURE_REFRESH).isNotNull()) {
@@ -48,7 +48,7 @@ public class Capture extends SingleOutcomeNode {
             }
         }
 
-        String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
+        String verificationChoice = "SELFIE";
         String url = "/mitek/p1.js";
 
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
@@ -61,7 +61,7 @@ public class Capture extends SingleOutcomeNode {
 
     private Action buildCallbacks(String url, String verificationChoice, Boolean isCaptureRefresh) {
         return send(new ArrayList<>() {{
-            add(new TextOutputCallback(0, "Please wait after image capture, it will be displayed shortly for preview."));
+            add(new TextOutputCallback(0, "Please wait after selfie image capture, it will be displayed shortly for preview."));
             add(new ScriptTextOutputCallback(getAuthDataScript(url, verificationChoice, isCaptureRefresh)));
             add(new HiddenValueCallback("captureResponse"));
         }}).build();
