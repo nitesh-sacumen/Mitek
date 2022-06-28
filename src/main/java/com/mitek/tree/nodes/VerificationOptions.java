@@ -108,19 +108,35 @@ public class VerificationOptions extends SingleOutcomeNode {
     }
 
     private String getAuthDataScript() {
-        return "document.getElementById('integratorDocTypeInput').remove();\n" +
-                "document.getElementById('mitekScript').remove();\n" +
-                "document.getElementById('capturedTimeout').remove();\n" +
-                "document.getElementById('uiContainer').remove();\n" +
-                "document.getElementById('mitekMediaContainer').remove();\n" +
-                "if (document.contains(document.getElementById('parentDiv'))) {\n" +
+        return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('integratorDocTypeInput'))) {\n" +
+                "document.getElementById('integratorDocTypeInput').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('capturedTimeout'))) {\n" +
+                "document.getElementById('capturedTimeout').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('mitekScript'))) {\n" +
+                "document.getElementById('mitekScript').remove();\n" +
                 "}\n" +
                 "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
                 "document.getElementById('integratorAutoCaptureButton').remove();\n" +
                 "}\n" +
                 "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
                 "document.getElementById('integratorManualCaptureButton').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('uiContainer'))) {\n" +
+                "document.getElementById('uiContainer').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
+                "document.getElementById('mitekMediaContainer').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('frontImage'))) {\n" +
+                "document.getElementById('frontImage').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
+                "document.getElementById('selfieImage').remove();\n" +
                 "}\n" +
                 "document.getElementById('loginButton_0').click();";
     }

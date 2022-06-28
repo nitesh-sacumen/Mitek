@@ -41,6 +41,4 @@ public final class Constants {
     public static final String CAPTURE_BACK = "capture_back";
     public static final String BASE64_STARTS_WITH = "data";
     public static final String VERIFICATION_REFERENCE_ID = "verification_reference_id";
-
-
 }
