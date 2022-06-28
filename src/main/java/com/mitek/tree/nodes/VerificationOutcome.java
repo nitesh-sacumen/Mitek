@@ -48,12 +48,10 @@ public class VerificationOutcome implements Node {
             } else if (verification_result == Constants.VERIFICATION_RETRY) {
                 System.out.println("retry");
                 return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-            }
-            else if (verification_result == Constants.VERIFICATION_TIMEOUT) {
+            } else if (verification_result == Constants.VERIFICATION_TIMEOUT) {
                 System.out.println("timeout");
                 return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-            }
-            else{
+            } else {
                 return null;
             }
         } catch (Exception e) {

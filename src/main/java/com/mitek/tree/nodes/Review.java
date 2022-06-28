@@ -52,13 +52,13 @@ public class Review implements Node {
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
-        if (!sharedState.get(Constants.CAPTURE_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
+        if (!sharedState.get(Constants.CAPTURE_FRONT_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
             logger.debug("image data is null/timeout");
             System.out.println("image data is null/timeout");
             sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
             return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
         }
-        String imageData = sharedState.get(Constants.CAPTURE_RESULT).asString();
+        String imageData = sharedState.get(Constants.CAPTURE_FRONT_RESULT).asString();
 
         if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
             String isRetake = context.getCallback(HiddenValueCallback.class).get().getValue();

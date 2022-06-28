@@ -40,7 +40,7 @@ public class CaptureFront extends SingleOutcomeNode {
     public Action process(TreeContext context) {
         logger.debug("*********************Capture front********************");
         JsonValue sharedState = context.sharedState;
-        Boolean isCaptureRefresh = false;
+        Boolean isCaptureRefresh;
         if (sharedState.get(Constants.IS_CAPTURE_REFRESH).isNotNull()) {
             isCaptureRefresh = sharedState.get(Constants.IS_CAPTURE_REFRESH).asBoolean();
             if (isCaptureRefresh == true) {
@@ -50,30 +50,49 @@ public class CaptureFront extends SingleOutcomeNode {
 
         String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
 
-        logger.debug("verificationChoice: "+verificationChoice);
-
+        logger.debug("verificationChoice: " + verificationChoice);
         String url = "/mitek/p1.js";
 
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
             String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
-            sharedState.put(Constants.CAPTURE_FRONT, imageData);
+            sharedState.put(Constants.CAPTURE_FRONT_RESULT, imageData);
             return goToNext().replaceSharedState(sharedState).build();
         }
-        return buildCallbacks(url, verificationChoice, isCaptureRefresh);
+        return buildCallbacks(url, verificationChoice);
     }
 
 
-    private Action buildCallbacks(String url, String identityChoice, Boolean isCaptureRefresh) {
+    private Action buildCallbacks(String url, String identityChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(getAuthDataScript(url, identityChoice,isCaptureRefresh)));
+            add(new ScriptTextOutputCallback(getAuthDataScript(url, identityChoice)));
             add(new HiddenValueCallback("captureFrontResponse"));
         }}).build();
 
     }
 
-    private String getAuthDataScript(String scriptURL, String identityChoice, Boolean isCaptureRefresh) {
-        return "var loadJS = function(url, implementationCode, location){\r\n" +
+    private String getAuthDataScript(String scriptURL, String identityChoice) {
+        return "if (document.contains(document.getElementById('uiContainer'))) {\n" +
+                "document.getElementById('uiContainer').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
+                "document.getElementById('mitekMediaContainer').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('integratorDocTypeInput'))) {\n" +
+                "document.getElementById('integratorDocTypeInput').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('capturedTimeout'))) {\n" +
+                "document.getElementById('capturedTimeout').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('mitekScript'))) {\n" +
+                "document.getElementById('mitekScript').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
+                "document.getElementById('integratorAutoCaptureButton').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
+                "document.getElementById('integratorManualCaptureButton').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('capturedImage'))) {\n" +
+                "document.getElementById('capturedImage').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('captureSelfieResponse'))) {\n" +
+                "document.getElementById('captureSelfieResponse').remove();\n" + "}\n" +
+
+
+                "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +
                 "scriptTag.src = url;\r\n" +
