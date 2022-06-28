@@ -52,16 +52,8 @@ public class Review implements Node {
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
-        if (!sharedState.get(Constants.CAPTURE_FRONT_RESULT).asString().startsWith(Constants.BASE64_STARTS_WITH)) {//correct this condition else retake is coming without image capturing
-            logger.debug("image data is null/timeout");
-            System.out.println("image data is null/timeout");
-            sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
-            return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
-        }
-        String imageData = sharedState.get(Constants.CAPTURE_FRONT_RESULT).asString();
-
         if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
-            String isRetake = context.getCallback(HiddenValueCallback.class).get().getValue();
+            String isRetake = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
             sharedState.put("isRetake", isRetake);
 
             if (isRetake.equalsIgnoreCase("true")) {
@@ -72,6 +64,8 @@ public class Review implements Node {
                 logger.debug("Submitting image.....");
                 System.out.println("Submitting image.....");
                 String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
+                String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
+                String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String apiUrl = sharedState.get(Constants.API_URL).asString();
                 String clientId = sharedState.get(Constants.CLIENT_ID).asString();
                 String clientSecret = sharedState.get(Constants.CLIENT_SECRET).asString();
@@ -117,7 +111,7 @@ public class Review implements Node {
                         //code for making api call to verify passport details via base 64 input
                         String[] passportData;
                         logger.debug("setting data......");
-                        passportData = imageData.split(",");
+                        passportData = frontData.split(",");
                         httpPost = createPostRequest(apiUrl + Constants.API_PASSPORT_URL);
 
                         JSONObject data = new JSONObject();
@@ -202,18 +196,20 @@ public class Review implements Node {
 
         }
 
-        return buildCallbacks(imageData);
+        return buildCallbacks();
     }
 
-    private Action buildCallbacks(String imageData) {
+    private Action buildCallbacks() {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(getAuthDataScript(imageData)));
+            add(new ScriptTextOutputCallback(getAuthDataScript()));
             add(new HiddenValueCallback("isRetake"));
+            add(new HiddenValueCallback("front"));
+            add(new HiddenValueCallback("selfie"));
         }}).build();
 
     }
 
-    private String getAuthDataScript(String imageData) {
+    private String getAuthDataScript() {
         return "document.getElementById('loginButton_0').style.display='none';\n" +
                 "document.getElementById('integratorAutoCaptureButton').remove();\n" +
                 "document.getElementById('integratorManualCaptureButton').remove();\n" +
@@ -229,11 +225,23 @@ public class Review implements Node {
                 "var buttonDiv=document.createElement('div');\n" +
                 "buttonDiv.id='buttonContainer';\n" +
                 "buttonDiv.className='float-child-right';\n" +
+
+                "var frontImage = document.getElementById('frontImage').value;\n" +
+                "document.getElementById('front').value = frontImage;\n" +
                 "var img = document.createElement('img');\n" +
-                "img.id='previewImage';\n" +
+                "img.id='frontImg';\n" +
                 "img.style.width='100%';\n" +
                 "img.style.height='auto';\n" +
-                "img.src = " + "'" + imageData + "'\n" +
+                "img.src = frontImage;\n" +
+
+                "var selfieImage = document.getElementById('selfieImage').value;\n" +
+                "document.getElementById('selfie').value = selfieImage;\n" +
+                "var img1 = document.createElement('img');\n" +
+                "img1.id='selfieImg';\n" +
+                "img1.style.width='100%';\n" +
+                "img1.style.height='auto';\n" +
+                "img1.src = selfieImage;\n" +
+
                 "var button = document.createElement('button');\n" +
                 "button.id = 'captureRetake';\n" +
                 "button.innerHTML = 'Retake'\n" +
@@ -252,6 +260,7 @@ public class Review implements Node {
                 "document.getElementById('loginButton_0').click();\n" +
                 "};\n" +
                 "div.appendChild(img);" +
+                "div.appendChild(img1);" +
                 "buttonDiv.appendChild(button)\n;" +
                 "buttonDiv.appendChild(button1)\n;" +
                 "parentDiv.appendChild(div);\n" +

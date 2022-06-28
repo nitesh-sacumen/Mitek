@@ -36,9 +36,6 @@ public final class Constants {
     public static final String VERIFICATION_FAILURE = "verification_failure";
     public static final String VERIFICATION_RETRY = "verification_retry";
     public static final String VERIFICATION_TIMEOUT = "verification_timeout";
-    public static final String CAPTURE_FRONT_RESULT = "capture_front_result";
-    public static final String CAPTURE_SELFIE_RESULT = "capture_selfie_result";
-    //public static final String CAPTURE_FRONT = "capture_front";
     public static final String BASE64_STARTS_WITH = "data";
     public static final String VERIFICATION_REFERENCE_ID = "verification_reference_id";
 }

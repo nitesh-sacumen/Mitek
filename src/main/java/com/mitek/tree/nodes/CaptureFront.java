@@ -54,8 +54,7 @@ public class CaptureFront extends SingleOutcomeNode {
         String url = "/mitek/p1.js";
 
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
-            String imageData = context.getCallback(HiddenValueCallback.class).get().getValue();
-            sharedState.put(Constants.CAPTURE_FRONT_RESULT, imageData);
+
             return goToNext().replaceSharedState(sharedState).build();
         }
         return buildCallbacks(url, verificationChoice);
@@ -114,11 +113,19 @@ public class CaptureFront extends SingleOutcomeNode {
                 "capturedTimeout.value = '';\n" +
                 "document.body.appendChild(capturedTimeout);\n" +
 
+
                 "var interval = setInterval(function () {\n" +
                 "var imageData = document.getElementById('capturedImage').src;\n" +
                 "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
                 "if (result === true) {\n" +
                 "document.getElementById('captureFrontResponse').value = imageData;\n" +
+
+                "var frontImage = document.createElement('input');\n" +
+                "frontImage.id = 'frontImage';\n" +
+                "frontImage.type = 'hidden';\n" +
+                "frontImage.value = imageData;\n" +
+                "document.body.appendChild(frontImage);\n" +
+
                 "f2();\n" +
                 "}\n" +
                 "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
