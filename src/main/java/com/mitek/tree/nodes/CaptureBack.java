@@ -51,13 +51,18 @@ public class CaptureBack extends SingleOutcomeNode {
         String backReference = "PDF417_BARCODE";
         String url = "/mitek/p1.js";
 
+
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
-            String codeData = context.getCallback(HiddenValueCallback.class).get().getValue();
-            System.out.println("code data: "+codeData);
-            sharedState.put(Constants.CAPTURE_BACK, codeData);
+            String isBackCaptureImage = context.getCallback(HiddenValueCallback.class).get().getValue();
+            logger.debug("isBackCaptureImage: "+isBackCaptureImage);
+            if (isBackCaptureImage.equalsIgnoreCase("true")) {
+                return buildCallbacks(url, backReference,isCaptureRefresh);
+            }
             return goToNext().replaceSharedState(sharedState).build();
+
+        } else {
+            return buildCallbacksForCaptureMessage();
         }
-        return buildCallbacks(url, backReference, isCaptureRefresh);
     }
 
 
@@ -68,6 +73,24 @@ public class CaptureBack extends SingleOutcomeNode {
             add(new HiddenValueCallback("captureBackResponse"));
         }}).build();
 
+    }
+
+    private Action buildCallbacksForCaptureMessage() {
+        logger.debug("buildCallbacksForCaptureMessage............");
+        return send(new ArrayList<>() {{
+            add(new TextOutputCallback(0, "Capture back of DL/ID"));
+            add(new ScriptTextOutputCallback(getAuthDataScriptForCaptureMessage()));
+            add(new HiddenValueCallback("diplayBackMessage"));
+        }}).build();
+
+    }
+
+    private String getAuthDataScriptForCaptureMessage() {
+        return "document.getElementById('loginButton_0').value = 'Capture Front Of DL/ID';\n" +
+                "var button = document.getElementById('loginButton_0');\n" +
+                "button.onclick = function() {\n" +
+                "document.getElementById('diplayBackMessage').value = 'true';\n" +
+                "};\n";
     }
 
     private String getAuthDataScript(String scriptURL, String backReference, Boolean isCaptureRefresh) {

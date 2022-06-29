@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
@@ -54,20 +55,45 @@ public class CaptureFront extends SingleOutcomeNode {
         String url = "/mitek/p1.js";
 
         if (context.getCallback(HiddenValueCallback.class).isPresent()) {
-
+            String isCaptureImage = context.getCallback(HiddenValueCallback.class).get().getValue();
+            logger.debug("isCaptureImage: "+isCaptureImage);
+            if (isCaptureImage.equalsIgnoreCase("true")) {
+                return buildCallbacks(url, verificationChoice);
+            }
             return goToNext().replaceSharedState(sharedState).build();
+
+        } else {
+            return buildCallbacksForCaptureMessage(verificationChoice);
         }
-        return buildCallbacks(url, verificationChoice);
     }
 
 
     private Action buildCallbacks(String url, String identityChoice) {
+        logger.debug("buildCallbacks............");
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image capture, it will be displayed shortly for preview."));
             add(new ScriptTextOutputCallback(getAuthDataScript(url, identityChoice)));
             add(new HiddenValueCallback("captureFrontResponse"));
         }}).build();
 
+    }
+
+    private Action buildCallbacksForCaptureMessage(String identityChoice) {
+        logger.debug("buildCallbacksForCaptureMessage............");
+        return send(new ArrayList<>() {{
+            add(new TextOutputCallback(0, "Capture front of " + identityChoice.toLowerCase()));
+            add(new ScriptTextOutputCallback(getAuthDataScriptForCaptureMessage(identityChoice)));
+            add(new HiddenValueCallback("diplayFrontMessage"));
+        }}).build();
+
+    }
+
+    private String getAuthDataScriptForCaptureMessage(String identityChoice) {
+        return "document.getElementById('loginButton_0').value = 'Capture Front Of " + identityChoice.toLowerCase() + "';\n" +
+                "var button = document.getElementById('loginButton_0');\n" +
+                "button.onclick = function() {\n" +
+                "document.getElementById('diplayFrontMessage').value = 'true';\n" +
+                "};\n";
     }
 
     private String getAuthDataScript(String scriptURL, String identityChoice) {
