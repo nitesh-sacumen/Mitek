@@ -78,10 +78,12 @@ public class Review implements Node {
 
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
-                String backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
-                System.out.println("back image code is:");
-                System.out.println(backImageCode);
-
+                String backImageCode = "";
+                if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
+                    backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
+                    System.out.println("back image code is:");
+                    System.out.println(backImageCode);
+                }
                 String clientId = sharedState.get(Constants.CLIENT_ID).asString();
                 String clientSecret = sharedState.get(Constants.CLIENT_SECRET).asString();
                 String grantType = sharedState.get(Constants.GRANT_TYPE).asString();
