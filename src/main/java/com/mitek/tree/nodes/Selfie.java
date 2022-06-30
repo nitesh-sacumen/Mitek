@@ -41,17 +41,10 @@ public class Selfie extends SingleOutcomeNode {
         logger.debug("*********************Selfie node********************");
         JsonValue sharedState = context.sharedState;
 
-        Boolean isCaptureRefresh;
-        if (sharedState.get(Constants.IS_CAPTURE_REFRESH).isNotNull()) {
-            isCaptureRefresh = sharedState.get(Constants.IS_CAPTURE_REFRESH).asBoolean();
-            if (isCaptureRefresh == true) {
-                sharedState.put(Constants.IS_CAPTURE_REFRESH, false);
-            }
-        }
         String verificationChoice = "SELFIE";
         String url = "/mitek/p1.js";
 
-        if (context.getCallback(HiddenValueCallback.class).isPresent()) {
+        if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         }
         return buildCallbacks(url, verificationChoice);
@@ -85,6 +78,12 @@ public class Selfie extends SingleOutcomeNode {
                 "document.getElementById('capturedImage').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('captureFrontResponse'))) {\n" +
                 "document.getElementById('captureFrontResponse').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('captureBackResponse'))) {\n" +
+                "document.getElementById('captureBackResponse').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('capturePassportResponse'))) {\n" +
+                "document.getElementById('capturePassportResponse').remove();\n" + "}\n" +
+                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
+                "document.getElementById('selfieImage').remove();\n" + "}\n" +
 
                 "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +

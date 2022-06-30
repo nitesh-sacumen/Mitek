@@ -33,6 +33,7 @@ public class VerificationOutcome implements Node {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationOutcome node********************");
+        System.out.println("*********************VerificationOutcome node********************");
         try {
             JsonValue sharedState = context.sharedState;
             String verification_result = sharedState.get(Constants.VERIFICATION_RESULT).asString();
@@ -40,19 +41,11 @@ public class VerificationOutcome implements Node {
             System.out.println("Verification result" + verification_result);
 
             if (verification_result == Constants.VERIFICATION_SUCCESS) {
-                System.out.println("success");
                 return goTo(MitekOutcome.SUCCESS).replaceSharedState(sharedState).build();
             } else if (verification_result == Constants.VERIFICATION_FAILURE) {
-                System.out.println("failure");
                 return goTo(MitekOutcome.FAILURE).replaceSharedState(sharedState).build();
-            } else if (verification_result == Constants.VERIFICATION_RETRY) {
-                System.out.println("retry");
-                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-            } else if (verification_result == Constants.VERIFICATION_TIMEOUT) {
-                System.out.println("timeout");
-                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
             } else {
-                return null;
+                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

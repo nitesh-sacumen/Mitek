@@ -25,8 +25,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
      * Configuration for the node.
      */
     public interface Config {
-        @Attribute(order = 100, requiredValue = true)
-        String apiUrl();
+
+        @Attribute(order = 100)
+        String consentData();
 
         @Attribute(order = 200, requiredValue = true)
         String clientId();
@@ -54,16 +55,16 @@ public class MitekConfiguration extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        if (config.apiUrl() == null || config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
+        if (config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
             logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
             System.out.println("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
             return null;
         }
-        sharedState.put(Constants.API_URL, config.apiUrl());
         sharedState.put(Constants.CLIENT_ID, config.clientId());
         sharedState.put(Constants.CLIENT_SECRET, config.clientSecret());
         sharedState.put(Constants.SCOPE, config.scope());
         sharedState.put(Constants.GRANT_TYPE, config.grantType());
+        sharedState.put(Constants.CONSENT_DATA, config.consentData());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 

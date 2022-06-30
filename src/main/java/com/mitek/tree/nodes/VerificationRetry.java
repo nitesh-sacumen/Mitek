@@ -1,9 +1,15 @@
 package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
+import com.mitek.tree.config.Constants;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
-import org.forgerock.openam.auth.node.api.*;
+import org.forgerock.json.JsonValue;
+import org.forgerock.openam.auth.node.api.Action;
+import org.forgerock.openam.auth.node.api.Node;
+import org.forgerock.openam.auth.node.api.NodeProcessException;
+import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,13 +18,14 @@ import javax.security.auth.callback.ConfirmationCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
-@Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationRetry.Config.class)
-public class VerificationRetry extends SingleOutcomeNode {
+@Node.Metadata(outcomeProvider = VerificationRetry.OutcomeProvider.class, configClass = VerificationRetry.Config.class)
+public class VerificationRetry implements Node {
 
-
+    private static final String BUNDLE = "com/mitek/tree/nodes/VerificationRetry";
     private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
@@ -69,9 +76,19 @@ public class VerificationRetry extends SingleOutcomeNode {
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationRetry node********************");
         try {
+            JsonValue sharedState = context.sharedState;
+            if (sharedState.get(Constants.RETRY_COUNT).isNull()) {
+                sharedState.put(Constants.RETRY_COUNT, 0);
+            } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == 3) {
+                return goTo(VerificationRetryOutcome.Reject).replaceSharedState(sharedState).build();
+            }
 
             if ((context.hasCallbacks())) {
-                return goToNext().build();
+                Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
+                retryCount++;
+                sharedState.put(Constants.RETRY_COUNT, retryCount);
+                sharedState.put(Constants.RETAKE_COUNT, 0);
+                return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();
             } else {
                 return collectRegField(context);
             }
@@ -109,5 +126,32 @@ public class VerificationRetry extends SingleOutcomeNode {
                 "if (document.contains(document.getElementById('hidden'))) {\n" +
                 "document.getElementById('hidden').remove();\n" +
                 "}\n";
+    }
+
+    private Action.ActionBuilder goTo(VerificationRetry.VerificationRetryOutcome outcome) {
+        return Action.goTo(outcome.name());
+    }
+
+    /**
+     * The possible outcomes for the VerificationRetry.
+     */
+    public enum VerificationRetryOutcome {
+        /**
+         * selection of Retry.
+         */
+        Retry,
+        /**
+         * selection for Reject.
+         */
+        Reject
+    }
+
+    public static class OutcomeProvider implements org.forgerock.openam.auth.node.api.OutcomeProvider {
+        @Override
+        public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
+            ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationRetry.BUNDLE, VerificationRetry.OutcomeProvider.class.getClassLoader());
+            return ImmutableList.of(new Outcome(VerificationRetryOutcome.Retry.name(), bundle.getString("retry")),
+                    new Outcome(VerificationRetryOutcome.Reject.name(), bundle.getString("reject")));
+        }
     }
 }

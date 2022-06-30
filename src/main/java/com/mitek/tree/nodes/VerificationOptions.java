@@ -37,7 +37,7 @@ public class VerificationOptions extends SingleOutcomeNode {
     }
 
 
-    private Action collectRegField(TreeContext context, Boolean isVerificationOptionsRefresh) {
+    private Action collectRegField() {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
         try {
@@ -61,7 +61,7 @@ public class VerificationOptions extends SingleOutcomeNode {
         try {
             logger.debug("*********************Verification Options node********************");
             JsonValue sharedState = context.sharedState;
-            Boolean isVerificationOptionsRefresh = false;
+            Boolean isVerificationOptionsRefresh;
 
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
                 isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
@@ -91,7 +91,7 @@ public class VerificationOptions extends SingleOutcomeNode {
                 sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                 return goToNext().build();
             } else {
-                return collectRegField(context, isVerificationOptionsRefresh);
+                return collectRegField();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -137,6 +137,9 @@ public class VerificationOptions extends SingleOutcomeNode {
                 "}\n" +
                 "if (document.contains(document.getElementById('selfieImage'))) {\n" +
                 "document.getElementById('selfieImage').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('passportImage'))) {\n" +
+                "document.getElementById('passportImage').remove();\n" +
                 "}\n" +
                 "document.getElementById('loginButton_0').click();";
     }

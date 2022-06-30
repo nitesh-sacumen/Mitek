@@ -6,8 +6,10 @@ import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -24,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import java.net.SocketTimeoutException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -51,29 +54,40 @@ public class Review implements Node {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Review node********************");
+        System.out.println("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
+        Integer retakeCount;
+        if (sharedState.get(Constants.RETAKE_COUNT).isNull()) {
+            sharedState.put(Constants.RETAKE_COUNT, 0);
+        }
+        retakeCount = sharedState.get(Constants.RETAKE_COUNT).asInteger();
         if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
             String isRetake = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
             sharedState.put("isRetake", isRetake);
-
             if (isRetake.equalsIgnoreCase("true")) {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 logger.debug("Retaking image.......");
+                retakeCount++;
+                sharedState.put(Constants.RETAKE_COUNT, retakeCount);
+                System.out.println(sharedState.get(Constants.RETAKE_COUNT).asInteger());
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
                 logger.debug("Submitting image.....");
                 System.out.println("Submitting image.....");
-                String verificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
+
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
-                String apiUrl = sharedState.get(Constants.API_URL).asString();
+                String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
+                String backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
+                System.out.println("back image code is:");
+                System.out.println(backImageCode);
+
                 String clientId = sharedState.get(Constants.CLIENT_ID).asString();
                 String clientSecret = sharedState.get(Constants.CLIENT_SECRET).asString();
                 String grantType = sharedState.get(Constants.GRANT_TYPE).asString();
                 String scope = sharedState.get(Constants.SCOPE).asString();
-
                 try (CloseableHttpClient httpclient = getHttpClient()) {
-                    HttpPost httpPost = createPostRequest(apiUrl + Constants.API_TOKEN_URL);
+                    HttpPost httpPost = createPostRequest(Constants.API_TOKEN_URL);
                     httpPost.addHeader("Accept", "*/*");
                     httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -89,15 +103,13 @@ public class Review implements Node {
 
                     StringEntity stringEntity = new StringEntity(form);
                     httpPost.setEntity(stringEntity);
-
                     CloseableHttpResponse response = httpclient.execute(httpPost);
-
                     Integer responseCode = response.getStatusLine().getStatusCode();
                     logger.debug("Access token response code: " + responseCode);
-
+                    System.out.println("Access token response code: " + responseCode);
                     HttpEntity entityResponse = response.getEntity();
                     String result = EntityUtils.toString(entityResponse);
-                    if (response.getStatusLine().getStatusCode() != 200) {
+                    if (responseCode != 200) {
                         throw new NodeProcessException("Not able to retrieve access token: " + result);
                     }
                     JSONObject jsonResponse = new JSONObject(result);
@@ -107,15 +119,18 @@ public class Review implements Node {
                         accessToken = jsonResponse.getString("access_token");
                     }
 
-                    if (accessToken != "") {
-                        //code for making api call to verify passport details via base 64 input
-                        String[] passportData;
-                        logger.debug("setting data......");
-                        passportData = frontData.split(",");
-                        httpPost = createPostRequest(apiUrl + Constants.API_PASSPORT_URL);
 
+                    if (accessToken != "") {
+                        httpPost = createPostRequest(Constants.VERIFY_DOCUMENT_API_URL);
+                        String[] imageData = null;
                         JSONObject data = new JSONObject();
-                        data.put("data", passportData[1]);
+                        if (frontData.startsWith(Constants.BASE64_STARTS_WITH)) {
+                            imageData = frontData.split(",");
+                        } else if (passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
+                            imageData = passportData.split(",");
+                        }
+
+                        data.put("data", imageData[1]);
 
                         JSONArray images = new JSONArray();
                         images.put(data);
@@ -124,67 +139,88 @@ public class Review implements Node {
                         obj.put("type", "IdDocument");
                         obj.put("images", images);
 
+
                         JSONArray evidence = new JSONArray();
                         evidence.put(obj);
-
                         JSONObject passportObj = new JSONObject();
+
+                        if (selfieData.startsWith(Constants.BASE64_STARTS_WITH)) {
+                            JSONObject selfieObject = new JSONObject();
+                            selfieObject.put("type", "Biometric");
+                            selfieObject.put("biometricType", "Selfie");
+                            String[] selfieImageData = selfieData.split(",");
+                            selfieObject.put("data", selfieImageData[1]);
+                            evidence.put(selfieObject);
+
+                            JSONObject verifications = new JSONObject();
+                            verifications.put("faceComparison", true);
+                            //verifications.put("faceLiveness", true);//confirm getting error face liveness account not activated on this account
+
+                            JSONObject configuration = new JSONObject();
+                            configuration.put("verifications", verifications);
+                            passportObj.put("configuration", configuration);
+
+                        }
                         passportObj.put("evidence", evidence);
                         httpPost.addHeader("Accept", "application/json");
                         httpPost.addHeader("Content-Type", "application/json");
-
                         httpPost.addHeader("Authorization", "Bearer " + accessToken);
                         stringEntity = new StringEntity(passportObj.toString());
                         httpPost.setEntity(stringEntity);
 
                         response = httpclient.execute(httpPost);
-                        Thread.sleep(30);//delay to handle timeout scenario
                         responseCode = response.getStatusLine().getStatusCode();
-                        logger.debug("verify api token response code: " + responseCode);
+                        logger.debug("verify document api response code: " + responseCode);
+                        System.out.println("verify document api response code: " + responseCode);
 
                         entityResponse = response.getEntity();
                         result = EntityUtils.toString(entityResponse);
                         jsonResponse = new JSONObject(result);
 
                         System.out.println(jsonResponse.toString(4));
+                        JSONObject findings;
+                        String referenceId;
 
-                        if (jsonResponse.has("dossierMetadata")) {
-                            JSONObject dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
-                            String referenceId = dossierMetadataObj.get("dossierId").toString();
-                            sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
-                        }
-
-                        if (jsonResponse.has("findings")) {
-                            JSONObject findings = (JSONObject) jsonResponse.get("findings");
-
-                            if (findings.has("authenticated")) {//authenticated true/false scenario
-                                Boolean isAuthenticated = (Boolean) findings.get("authenticated");
-                                if (isAuthenticated) {
-                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
-                                } else {
-                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
+                        for (Integer i = 1; i <= 30; i++) {
+                            if (jsonResponse.has("dossierMetadata")) {
+                                JSONObject dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
+                                referenceId = dossierMetadataObj.get("dossierId").toString();
+                                sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
+                                if (jsonResponse.has("findings")) {
+                                    findings = (JSONObject) jsonResponse.get("findings");
+                                    Boolean isAuthenticated = (Boolean) findings.get("authenticated");
+                                    if (isAuthenticated) {
+                                        sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
+                                    } else {
+                                        sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
+                                    }
+                                    logger.debug("authentication status is:: " + isAuthenticated);
+                                    System.out.println("authentication status is:: " + isAuthenticated);
+                                    break;
                                 }
-                                logger.debug("passport authentication status is:: " + isAuthenticated);
-                                System.out.println("passport authentication status is:: " + isAuthenticated);
                             }
-                        }
-                        //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
-                        // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
-                        else if (responseCode == 400 || responseCode == 401 || responseCode == 403 ||
-                                responseCode == 408 || responseCode == 415 ||
-                                responseCode == 500 || responseCode == 502 ||
-                                responseCode == 503 || responseCode == 504) {//system error/ retry scenario
-                            logger.debug("passport authentication status is:: Retry");
-                            System.out.println("passport authentication status is:: Retry");
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
-                        } else {//timeout scenario
-                            logger.debug("passport authentication status is:: timeout");
-                            System.out.println("passport authentication status is:: timeout");
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_TIMEOUT);
-                        }
+                            //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
+                            // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
+                            else if (responseCode == 400 || responseCode == 401 || responseCode == 403 ||
+                                    responseCode == 408 || responseCode == 415 ||
+                                    responseCode == 500 || responseCode == 502 ||
+                                    responseCode == 503 || responseCode == 504) {//system error/ retry scenario
+                                logger.debug("authentication status is:: Retry");
+                                System.out.println("authentication status is:: Retry");
+                                sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
+                                break;
+                            }
 
-
+                            Thread.sleep(1000);
+                        }
                     }
 
+                } catch (ConnectTimeoutException e) {
+                    logger.error(e.getMessage());
+                    e.printStackTrace();
+                } catch (SocketTimeoutException e) {
+                    logger.error(e.getMessage());
+                    e.printStackTrace();
                 } catch (Exception e) {
                     logger.error(e.getMessage());
                     e.printStackTrace();
@@ -196,36 +232,37 @@ public class Review implements Node {
 
         }
 
-        return buildCallbacks();
+        return buildCallbacks(retakeCount);
     }
 
-    private Action buildCallbacks() {
+    private Action buildCallbacks(Integer retakeCount) {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(getAuthDataScript()));
+            add(new ScriptTextOutputCallback(getAuthDataScript(retakeCount)));
             add(new HiddenValueCallback("isRetake"));
             add(new HiddenValueCallback("front"));
             add(new HiddenValueCallback("selfie"));
+            add(new HiddenValueCallback("passport"));
+            add(new HiddenValueCallback("back"));
         }}).build();
 
     }
 
-    private String getAuthDataScript() {
+    private String getAuthDataScript(Integer retakeCount) {
         return "document.getElementById('loginButton_0').style.display='none';\n" +
+                "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
                 "document.getElementById('integratorAutoCaptureButton').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
                 "document.getElementById('integratorManualCaptureButton').remove();\n" +
-
+                "}\n" +
+                "if (document.contains(document.getElementById('frontImage')) || document.contains(document.getElementById('passportImage'))) {\n" +
                 "var parentDiv=document.createElement('div');\n" +
                 "parentDiv.id='parentDiv';\n" +
                 "parentDiv.className='float-container';\n" +
-                "parentDiv.style.marginTop='-20%';\n" +
-                "parentDiv.style.overflow='hidden';\n" +
                 "var div=document.createElement('div');\n" +
                 "div.id='imageContainer';\n" +
-                "div.className='float-child-left';\n" +
-                "var buttonDiv=document.createElement('div');\n" +
-                "buttonDiv.id='buttonContainer';\n" +
-                "buttonDiv.className='float-child-right';\n" +
 
+                "if (document.contains(document.getElementById('frontImage'))) {\n" +
                 "var frontImage = document.getElementById('frontImage').value;\n" +
                 "document.getElementById('front').value = frontImage;\n" +
                 "var img = document.createElement('img');\n" +
@@ -233,7 +270,43 @@ public class Review implements Node {
                 "img.style.width='100%';\n" +
                 "img.style.height='auto';\n" +
                 "img.src = frontImage;\n" +
+                "img.className='float-child-image';\n" +
+                "div.appendChild(img);" +
+                "}\n" +
+                "else{\n" +
+                "document.getElementById('front').value = '';\n" +
+                "}\n" +
 
+                "if (document.contains(document.getElementById('backImageData'))) {\n" +
+                "var backImageData = document.getElementById('backImageData').value;\n" +
+                "document.getElementById('back').value = backImageData;\n" +
+                "var img = document.createElement('img');\n" +
+                "img.id='backImg';\n" +
+                "img.style.width='100%';\n" +
+                "img.style.height='auto';\n" +
+                "img.src = backImageData;\n" +
+                "img.className='float-child-image';\n" +
+                "div.appendChild(img);" +
+                "}\n" +
+                "else{\n" +
+                "document.getElementById('back').value = '';\n" +
+                "}\n" +
+
+                "if (document.contains(document.getElementById('passportImage'))) {\n" +
+                "var passportImage = document.getElementById('passportImage').value;\n" +
+                "document.getElementById('passport').value = passportImage;\n" +
+                "var img = document.createElement('img');\n" +
+                "img.id='passportImg';\n" +
+                "img.style.width='100%';\n" +
+                "img.style.height='auto';\n" +
+                "img.src = passportImage;\n" +
+                "img.className='float-child-image';\n" +
+                "div.appendChild(img);" +
+                "}\n" +
+                "else{\n" +
+                "document.getElementById('passport').value = '';\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
                 "var selfieImage = document.getElementById('selfieImage').value;\n" +
                 "document.getElementById('selfie').value = selfieImage;\n" +
                 "var img1 = document.createElement('img');\n" +
@@ -241,14 +314,23 @@ public class Review implements Node {
                 "img1.style.width='100%';\n" +
                 "img1.style.height='auto';\n" +
                 "img1.src = selfieImage;\n" +
-
+                "img1.className='float-child-image';\n" +
+                "div.appendChild(img1);" +
+                "}\n" +
+                "else{\n" +
+                "document.getElementById('selfie').value = '';\n" +
+                "}\n" +
+                "var buttonDiv=document.createElement('div');\n" +
+                "buttonDiv.id='buttonContainer';\n" +
                 "var button = document.createElement('button');\n" +
                 "button.id = 'captureRetake';\n" +
                 "button.innerHTML = 'Retake'\n" +
                 "button.className = 'btn btn-block btn-primary';\n" +
+                "if(" + retakeCount + "===3){\n" +
+                "button.disabled = true;\n" +
+                "};\n" +
                 "button.onclick = function() {\n" +
                 "document.getElementById('isRetake').value = 'true'\n" +
-                "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "document.getElementById('loginButton_0').click();\n" +
                 "};\n" +
                 "var button1 = document.createElement('button');\n" +
@@ -259,13 +341,12 @@ public class Review implements Node {
                 "document.getElementById('isRetake').value = 'false'\n" +
                 "document.getElementById('loginButton_0').click();\n" +
                 "};\n" +
-                "div.appendChild(img);" +
-                "div.appendChild(img1);" +
                 "buttonDiv.appendChild(button)\n;" +
                 "buttonDiv.appendChild(button1)\n;" +
                 "parentDiv.appendChild(div);\n" +
                 "parentDiv.appendChild(buttonDiv);\n" +
-                "document.body.appendChild(parentDiv);\n";
+                "document.body.appendChild(parentDiv);\n" +
+                "}\n";
     }
 
     public CloseableHttpClient getHttpClient() {
@@ -278,9 +359,13 @@ public class Review implements Node {
 
     public CloseableHttpClient buildDefaultClient() {
         logger.debug("requesting http client connection client open");
-
+        Integer timeout = 30;
+        RequestConfig config = RequestConfig.custom()
+                .setConnectTimeout(timeout * 1000)
+                .setConnectionRequestTimeout(timeout * 1000)
+                .setSocketTimeout(timeout * 1000).build();
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        return clientBuilder.build();
+        return clientBuilder.setDefaultRequestConfig(config).build();
     }
 
     private Action.ActionBuilder goTo(Review.ReviewOutcome outcome) {
