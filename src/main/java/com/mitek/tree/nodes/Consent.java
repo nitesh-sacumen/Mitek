@@ -2,6 +2,8 @@ package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.util.ConsentScript;
+import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
@@ -39,6 +41,9 @@ public class Consent extends SingleOutcomeNode {
     private Action collectRegField(String[] consentLines) {
         try {
             logger.debug("*********************Consent node********************");
+            ConsentScript consentScript = new ConsentScript();
+            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(consentScript.getConsentScript());
+            cbList.add(scriptTextOutputCallback);
             TextOutputCallback textOutputCallback;
             for (Integer i = 0; i < consentLines.length; i++) {
                 textOutputCallback = new TextOutputCallback(0, consentLines[i]);
@@ -60,7 +65,6 @@ public class Consent extends SingleOutcomeNode {
             JsonValue sharedState = context.sharedState;
             if (sharedState.get(Constants.CONSENT_DATA).isNull()) {
                 logger.debug("skipping consent node as no data provided");
-                System.out.println("skipping consent node as no data provided");
                 return goToNext().build();
             } else if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {
                 return goToNext().build();

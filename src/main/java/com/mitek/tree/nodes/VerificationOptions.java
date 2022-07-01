@@ -2,6 +2,7 @@ package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.util.VerificationOptionsScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
@@ -23,10 +24,11 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 
 @Node.Metadata(outcomeProvider = VerificationOptions.VerificationOptionsOutcomeProvider.class, configClass = VerificationOptions.Config.class)
 public class VerificationOptions implements Node {
-
+    VerificationOptionsScript verificationOptionsScript = new VerificationOptionsScript();
 
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOptions";
+
     /**
      * Configuration for the node.
      */
@@ -38,7 +40,6 @@ public class VerificationOptions implements Node {
     public VerificationOptions() {
     }
 
-
     private Action collectRegField() {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
@@ -46,11 +47,9 @@ public class VerificationOptions implements Node {
             String[] choices = {"Passport", "DL/ID"};
             ChoiceCallback verificationOptions = new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false);
             cbList.add(verificationOptions);
-
             String[] submitButton = {"Next"};
             ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
             cbList.add(confirmationCallback);
-
         } catch (Exception e) {
             logger.error(e.getMessage());
             e.printStackTrace();
@@ -64,7 +63,6 @@ public class VerificationOptions implements Node {
             logger.debug("*********************Verification Options node********************");
             JsonValue sharedState = context.sharedState;
             Boolean isVerificationOptionsRefresh;
-
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
                 isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
                 if (isVerificationOptionsRefresh == true) {
@@ -74,7 +72,6 @@ public class VerificationOptions implements Node {
             }
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
                 Integer selectedIndex = Arrays.stream(context.getCallback(ChoiceCallback.class).get().getSelectedIndexes()).findFirst().getAsInt();
-
                 String selectedValue;
                 switch (selectedIndex) {
                     case 0:
@@ -87,7 +84,6 @@ public class VerificationOptions implements Node {
                         return goTo(VerificationOptionsOutcome.IDDL).replaceSharedState(sharedState).build();
                     default:
                         logger.debug("No option selected/Invalid option. Please try again.");
-                        System.out.println("No option selected/Invalid option. Please try again.");
                         return null;
                 }
             } else {
@@ -99,9 +95,11 @@ public class VerificationOptions implements Node {
             throw new NodeProcessException("Exception is: " + e);
         }
     }
+
     private Action.ActionBuilder goTo(VerificationOptions.VerificationOptionsOutcome outcome) {
         return Action.goTo(outcome.name());
     }
+
     /**
      * The possible outcomes for the VerificationOptions.
      */
@@ -116,45 +114,13 @@ public class VerificationOptions implements Node {
         PASSPORT
     }
 
-
     private Action buildCallbacks() {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(getAuthDataScript()));
+            add(new ScriptTextOutputCallback(verificationOptionsScript.getVerificationOptionsScript()));
         }}).build();
 
     }
 
-    private String getAuthDataScript() {
-        return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
-                "document.getElementById('parentDiv').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorDocTypeInput'))) {\n" +
-                "document.getElementById('integratorDocTypeInput').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('capturedTimeout'))) {\n" +
-                "document.getElementById('capturedTimeout').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('mitekScript'))) {\n" +
-                "document.getElementById('mitekScript').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
-                "document.getElementById('integratorAutoCaptureButton').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
-                "document.getElementById('integratorManualCaptureButton').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('uiContainer'))) {\n" +
-                "document.getElementById('uiContainer').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
-                "document.getElementById('mitekMediaContainer').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
-                "document.getElementById('capturedImageContainer').remove();\n" +
-                "}\n" +
-                "}\n" +
-                "document.getElementById('loginButton_0').click();";
-    }
 
     public static class VerificationOptionsOutcomeProvider implements OutcomeProvider {
         @Override

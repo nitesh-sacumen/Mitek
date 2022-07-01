@@ -2,6 +2,7 @@ package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.util.VerificationRetryScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
@@ -24,7 +25,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 
 @Node.Metadata(outcomeProvider = VerificationRetry.OutcomeProvider.class, configClass = VerificationRetry.Config.class)
 public class VerificationRetry implements Node {
-
+    VerificationRetryScript verificationRetryScript = new VerificationRetryScript();
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationRetry";
     private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
@@ -39,36 +40,26 @@ public class VerificationRetry implements Node {
 
     private Action collectRegField(TreeContext context) {
         try {
-
             TextOutputCallback label1 = new TextOutputCallback(0, "Verification Error");
             cbList.add(label1);
-
             TextOutputCallback label2 = new TextOutputCallback(0, "Oops! There was an issue on the captured image.");
             cbList.add(label2);
-
             TextOutputCallback label3 = new TextOutputCallback(0, "We would like you to retry.");
             cbList.add(label3);
-
             TextOutputCallback label4 = new TextOutputCallback(0, "Tips for retake.");
             cbList.add(label4);
-
             TextOutputCallback label5 = new TextOutputCallback(0, "Make sure the lighting is proper.");
             cbList.add(label5);
-
             TextOutputCallback label6 = new TextOutputCallback(0, "Use dark background.");
             cbList.add(label6);
-
             String[] choices = {"Retry"};
             ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
             cbList.add(confirmationCallback);
-
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(getAuthDataScript());
+            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(verificationRetryScript.getVerificationRetryScript());
             cbList.add(scriptTextOutputCallback);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-
-
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
@@ -99,41 +90,6 @@ public class VerificationRetry implements Node {
         }
     }
 
-    private String getAuthDataScript() {
-
-        return "if (document.contains(document.getElementById('footer'))) {\n" +
-                "document.getElementById('footer').style.marginBottom='0px';\n" +
-                "}\n" +
-
-                "if (document.contains(document.getElementById('parentDiv'))) {\n" +
-                "document.getElementById('parentDiv').remove();\n" +
-                "}\n" +
-
-
-                "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
-                "document.getElementById('mitekMediaContainer').remove();\n" +
-                "}\n" +
-
-
-                "if (document.contains(document.getElementById('uiContainer'))) {\n" +
-                "document.getElementById('uiContainer').remove();\n" +
-                "}\n" +
-
-                "if (document.contains(document.getElementById('mitekScript'))) {\n" +
-                "document.getElementById('mitekScript').remove();\n" +
-                "}\n" +
-
-                "if (document.contains(document.getElementById('capturedTimeout'))) {\n" +
-                "document.getElementById('capturedTimeout').remove();\n" +
-                "}\n" +
-
-                "if (document.contains(document.getElementById('hidden'))) {\n" +
-                "document.getElementById('hidden').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
-                "document.getElementById('capturedImageContainer').remove();\n" +
-                "}\n";
-    }
 
     private Action.ActionBuilder goTo(VerificationRetry.VerificationRetryOutcome outcome) {
         return Action.goTo(outcome.name());
