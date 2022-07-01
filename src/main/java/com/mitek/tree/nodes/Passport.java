@@ -52,8 +52,13 @@ public class Passport extends SingleOutcomeNode {
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
             return buildCallbacks(url, verificationChoice);
         } else {
+            Boolean isVerificationRefresh = false;
+            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
+                isVerificationRefresh = true;
+                sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
+            }
             List<Callback> cbList = new ArrayList<>();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(removeElements());
+            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(removeElements(isVerificationRefresh));
             cbList.add(scriptTextOutputCallback);
             TextOutputCallback textOutputCallback1 = new TextOutputCallback(0, "Capture Passport");
             cbList.add(textOutputCallback1);
@@ -79,7 +84,7 @@ public class Passport extends SingleOutcomeNode {
 
     }
 
-    private String removeElements() {
+    private String removeElements(Boolean isVerificationRefresh) {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
                 "}\n" +
@@ -104,19 +109,18 @@ public class Passport extends SingleOutcomeNode {
                 "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
                 "document.getElementById('mitekMediaContainer').remove();\n" +
                 "}\n" +
-                "if (document.contains(document.getElementById('frontImage'))) {\n" +
-                "document.getElementById('frontImage').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
-                "document.getElementById('selfieImage').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('passportImage'))) {\n" +
-                "document.getElementById('passportImage').remove();\n" +
-                "}\n" +
+                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
+                "document.getElementById('capturedImageContainer').remove();\n" + "}\n" +
+
                 "if (document.contains(document.getElementById('capturedImage'))) {\n" +
                 "document.getElementById('capturedImage').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('captureFrontResponse'))) {\n" +
-                "document.getElementById('captureFrontResponse').remove();\n" + "}\n";
+                "document.getElementById('captureFrontResponse').remove();\n" + "}\n" +
+                "if(" + isVerificationRefresh + "){\n" +
+                "if (document.contains(document.getElementById('footer'))) {\n" +
+                "document.getElementById('footer').style.marginBottom='0px';\n" +
+                "}\n" +
+                "}\n";
     }
 
     private String getAuthDataScript(String scriptURL, String verificationChoice) {
@@ -138,12 +142,15 @@ public class Passport extends SingleOutcomeNode {
                 "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
                 "if (result === true) " +
                 "{\n" +
+                "var capturedImageContainer = document.createElement('div');\n" +
+                "capturedImageContainer.id='capturedImageContainer';\n" +
                 "document.getElementById('capturePassportResponse').value = imageData;\n" +
                 "var passportImage = document.createElement('input');\n" +
                 "passportImage.id = 'passportImage';\n" +
                 "passportImage.type = 'hidden';\n" +
                 "passportImage.value = imageData;\n" +
-                "document.body.appendChild(passportImage);\n" +
+                "capturedImageContainer.appendChild(passportImage);\n" +
+                "document.body.appendChild(capturedImageContainer);\n" +
                 "f2();\n" + "}\n" +
                 "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
                 "document.getElementById('capturePassportResponse').value = '';\n" +

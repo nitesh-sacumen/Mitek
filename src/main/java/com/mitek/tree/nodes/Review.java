@@ -75,7 +75,6 @@ public class Review implements Node {
                 logger.debug("Submitting image.....");
                 System.out.println("Submitting image.....");
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
-
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
                 String backImageCode = "";
@@ -98,10 +97,7 @@ public class Review implements Node {
                     parameters.put("scope", scope);
                     parameters.put("client_id", clientId);
                     parameters.put("client_secret", clientSecret);
-                    String form = parameters.entrySet()
-                            .stream()
-                            .map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8))
-                            .collect(Collectors.joining("&"));
+                    String form = parameters.entrySet().stream().map(e -> e.getKey() + "=" + URLEncoder.encode(e.getValue(), StandardCharsets.UTF_8)).collect(Collectors.joining("&"));
 
                     StringEntity stringEntity = new StringEntity(form);
                     httpPost.setEntity(stringEntity);
@@ -137,6 +133,14 @@ public class Review implements Node {
                         JSONArray images = new JSONArray();
                         images.put(data);
 
+                        if (backImageCode != "") {
+                            JSONObject backImageCodeObject = new JSONObject();
+                            JSONObject encodedDataObject = new JSONObject();
+                            encodedDataObject.put("PDF417", backImageCode);
+                            backImageCodeObject.put("encodedData", encodedDataObject);
+                            images.put(backImageCodeObject);
+                        }
+
                         JSONObject obj = new JSONObject();
                         obj.put("type", "IdDocument");
                         obj.put("images", images);
@@ -144,7 +148,7 @@ public class Review implements Node {
 
                         JSONArray evidence = new JSONArray();
                         evidence.put(obj);
-                        JSONObject passportObj = new JSONObject();
+                        JSONObject parentObj = new JSONObject();
 
                         if (selfieData.startsWith(Constants.BASE64_STARTS_WITH)) {
                             JSONObject selfieObject = new JSONObject();
@@ -156,18 +160,23 @@ public class Review implements Node {
 
                             JSONObject verifications = new JSONObject();
                             verifications.put("faceComparison", true);
-                            //verifications.put("faceLiveness", true);//confirm getting error face liveness account not activated on this account
+                            //verifications.put("faceLiveness", true);//confirm getting error face liveness not activated on this account
 
                             JSONObject configuration = new JSONObject();
                             configuration.put("verifications", verifications);
-                            passportObj.put("configuration", configuration);
+                            parentObj.put("configuration", configuration);
 
                         }
-                        passportObj.put("evidence", evidence);
+
+
+                        parentObj.put("evidence", evidence);
                         httpPost.addHeader("Accept", "application/json");
                         httpPost.addHeader("Content-Type", "application/json");
                         httpPost.addHeader("Authorization", "Bearer " + accessToken);
-                        stringEntity = new StringEntity(passportObj.toString());
+
+                        System.out.println("payload is::");
+                       System.out.println(parentObj.toString(4));
+                        stringEntity = new StringEntity(parentObj.toString());
                         httpPost.setEntity(stringEntity);
 
                         response = httpclient.execute(httpPost);
@@ -203,10 +212,7 @@ public class Review implements Node {
                             }
                             //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
                             // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
-                            else if (responseCode == 400 || responseCode == 401 || responseCode == 403 ||
-                                    responseCode == 408 || responseCode == 415 ||
-                                    responseCode == 500 || responseCode == 502 ||
-                                    responseCode == 503 || responseCode == 504) {//system error/ retry scenario
+                            else if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408 || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503 || responseCode == 504) {//system error/ retry scenario
                                 logger.debug("authentication status is:: Retry");
                                 System.out.println("authentication status is:: Retry");
                                 sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
@@ -251,17 +257,16 @@ public class Review implements Node {
 
     private String getAuthDataScript(Integer retakeCount) {
         return "document.getElementById('loginButton_0').style.display='none';\n" +
+                "if (document.contains(document.getElementById('footer'))) {\n" +
+                "document.getElementById('footer').style.marginBottom='-40%';\n" +
+                "}\n" +
                 "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
-                "document.getElementById('integratorAutoCaptureButton').remove();\n" +
-                "}\n" +
+                "document.getElementById('integratorAutoCaptureButton').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
-                "document.getElementById('integratorManualCaptureButton').remove();\n" +
-                "}\n" +
+                "document.getElementById('integratorManualCaptureButton').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('frontImage')) || document.contains(document.getElementById('passportImage'))) {\n" +
-                "var parentDiv=document.createElement('div');\n" +
-                "parentDiv.id='parentDiv';\n" +
-                "parentDiv.className='float-container';\n" +
-                "var div=document.createElement('div');\n" +
+                "var parentDiv=document.createElement('div');\n" + "parentDiv.id='parentDiv';\n" +
+                "parentDiv.className='float-container';\n" + "var div=document.createElement('div');\n" +
                 "div.id='imageContainer';\n" +
 
                 "if (document.contains(document.getElementById('frontImage'))) {\n" +
@@ -273,26 +278,22 @@ public class Review implements Node {
                 "img.style.height='auto';\n" +
                 "img.src = frontImage;\n" +
                 "img.className='float-child-image';\n" +
-                "div.appendChild(img);" +
-                "}\n" +
+                "div.appendChild(img);" + "}\n" +
                 "else{\n" +
-                "document.getElementById('front').value = '';\n" +
-                "}\n" +
+                "document.getElementById('front').value = '';\n" + "}\n" +
 
                 "if (document.contains(document.getElementById('backImageData'))) {\n" +
                 "var backImageData = document.getElementById('backImageData').value;\n" +
                 "document.getElementById('back').value = backImageData;\n" +
                 "var img = document.createElement('img');\n" +
-                "img.id='backImg';\n" +
-                "img.style.width='100%';\n" +
+                "img.id='backImg';\n" + "img.style.width='100%';\n" +
                 "img.style.height='auto';\n" +
                 "img.src = backImageData;\n" +
                 "img.className='float-child-image';\n" +
                 "div.appendChild(img);" +
                 "}\n" +
                 "else{\n" +
-                "document.getElementById('back').value = '';\n" +
-                "}\n" +
+                "document.getElementById('back').value = '';\n" + "}\n" +
 
                 "if (document.contains(document.getElementById('passportImage'))) {\n" +
                 "var passportImage = document.getElementById('passportImage').value;\n" +
@@ -303,52 +304,13 @@ public class Review implements Node {
                 "img.style.height='auto';\n" +
                 "img.src = passportImage;\n" +
                 "img.className='float-child-image';\n" +
-                "div.appendChild(img);" +
-                "}\n" +
-                "else{\n" +
-                "document.getElementById('passport').value = '';\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
+                "div.appendChild(img);" + "}\n" +
+                "else{\n" + "document.getElementById('passport').value = '';\n" +
+                "}\n" + "if (document.contains(document.getElementById('selfieImage'))) {\n" +
                 "var selfieImage = document.getElementById('selfieImage').value;\n" +
                 "document.getElementById('selfie').value = selfieImage;\n" +
                 "var img1 = document.createElement('img');\n" +
-                "img1.id='selfieImg';\n" +
-                "img1.style.width='100%';\n" +
-                "img1.style.height='auto';\n" +
-                "img1.src = selfieImage;\n" +
-                "img1.className='float-child-image';\n" +
-                "div.appendChild(img1);" +
-                "}\n" +
-                "else{\n" +
-                "document.getElementById('selfie').value = '';\n" +
-                "}\n" +
-                "var buttonDiv=document.createElement('div');\n" +
-                "buttonDiv.id='buttonContainer';\n" +
-                "var button = document.createElement('button');\n" +
-                "button.id = 'captureRetake';\n" +
-                "button.innerHTML = 'Retake'\n" +
-                "button.className = 'btn btn-block btn-primary';\n" +
-                "if(" + retakeCount + "===3){\n" +
-                "button.disabled = true;\n" +
-                "};\n" +
-                "button.onclick = function() {\n" +
-                "document.getElementById('isRetake').value = 'true'\n" +
-                "document.getElementById('loginButton_0').click();\n" +
-                "};\n" +
-                "var button1 = document.createElement('button');\n" +
-                "button1.id = 'captureSubmit';\n" +
-                "button1.innerHTML = 'Submit'\n" +
-                "button1.className = 'btn btn-block btn-primary';\n" +
-                "button1.onclick = function() {\n" +
-                "document.getElementById('isRetake').value = 'false'\n" +
-                "document.getElementById('loginButton_0').click();\n" +
-                "};\n" +
-                "buttonDiv.appendChild(button)\n;" +
-                "buttonDiv.appendChild(button1)\n;" +
-                "parentDiv.appendChild(div);\n" +
-                "parentDiv.appendChild(buttonDiv);\n" +
-                "document.body.appendChild(parentDiv);\n" +
-                "}\n";
+                "img1.id='selfieImg';\n" + "img1.style.width='100%';\n" + "img1.style.height='auto';\n" + "img1.src = selfieImage;\n" + "img1.className='float-child-image';\n" + "div.appendChild(img1);" + "}\n" + "else{\n" + "document.getElementById('selfie').value = '';\n" + "}\n" + "var buttonDiv=document.createElement('div');\n" + "buttonDiv.id='buttonContainer';\n" + "var button = document.createElement('button');\n" + "button.id = 'captureRetake';\n" + "button.innerHTML = 'Retake'\n" + "button.className = 'btn btn-block btn-primary';\n" + "if(" + retakeCount + "===3){\n" + "button.disabled = true;\n" + "};\n" + "button.onclick = function() {\n" + "document.getElementById('isRetake').value = 'true'\n" + "document.getElementById('loginButton_0').click();\n" + "};\n" + "var button1 = document.createElement('button');\n" + "button1.id = 'captureSubmit';\n" + "button1.innerHTML = 'Submit'\n" + "button1.className = 'btn btn-block btn-primary';\n" + "button1.onclick = function() {\n" + "document.getElementById('isRetake').value = 'false'\n" + "document.getElementById('loginButton_0').click();\n" + "};\n" + "buttonDiv.appendChild(button)\n;" + "buttonDiv.appendChild(button1)\n;" + "parentDiv.appendChild(div);\n" + "parentDiv.appendChild(buttonDiv);\n" + "document.body.appendChild(parentDiv);\n" + "}\n";
     }
 
     public CloseableHttpClient getHttpClient() {
@@ -362,10 +324,7 @@ public class Review implements Node {
     public CloseableHttpClient buildDefaultClient() {
         logger.debug("requesting http client connection client open");
         Integer timeout = 30;
-        RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(timeout * 1000)
-                .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000).build();
+        RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         return clientBuilder.setDefaultRequestConfig(config).build();
     }
@@ -393,8 +352,7 @@ public class Review implements Node {
         @Override
         public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
             ResourceBundle bundle = locales.getBundleInPreferredLocale(Review.BUNDLE, Review.ReviewOutcomeProvider.class.getClassLoader());
-            return ImmutableList.of(new Outcome(ReviewOutcome.Retake.name(), bundle.getString("retake")),
-                    new Outcome(ReviewOutcome.Wait.name(), bundle.getString("wait")));
+            return ImmutableList.of(new Outcome(ReviewOutcome.Retake.name(), bundle.getString("retake")), new Outcome(ReviewOutcome.Wait.name(), bundle.getString("wait")));
         }
     }
 }

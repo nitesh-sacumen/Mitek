@@ -49,8 +49,7 @@ public class CaptureBack extends SingleOutcomeNode {
         if (context.getCallback(HiddenValueCallback.class).isPresent()
                 && context.getCallbacks(HiddenValueCallback.class).get(0).getValue().contains("*")) {
             String backImageCode = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
-            backImageCode = backImageCode.substring(backImageCode.indexOf("*"));
-            sharedState.put(Constants.PDF_417_CODE,backImageCode);
+            sharedState.put(Constants.PDF_417_CODE, backImageCode);
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
             return buildCallbacks(url, verificationChoice);
@@ -124,9 +123,6 @@ public class CaptureBack extends SingleOutcomeNode {
                 "link.type = 'text/css';\r\n" +
                 "link.href = '/mitek/style.css';\r\n" +
                 "document.getElementById('loginButton_0').style.display = 'none';\n" +
-                "if (document.contains(document.getElementById('footer'))) {\n" +
-                "document.getElementById('footer').style.marginBottom='-50%';\n" +
-                "}\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +
                 "var input = document.createElement('input');\r\n" + "input.setAttribute('type', 'hidden');\r\n" +
@@ -141,22 +137,24 @@ public class CaptureBack extends SingleOutcomeNode {
                 "document.body.appendChild(capturedTimeout);\n" +
 
                 "var interval = setInterval(function () {\n" +
-                "var codeData = document.getElementById('capturedBackImageCode').src;\n" +
+                "var codeData = document.getElementById('capturedBackImageCode').value;\n" +
                 "var result = codeData.includes('*');\n" +
                 "if (result === true) {\n" +
                 "document.getElementById('captureBackResponse').value = codeData;\n" +
                 "var backData = document.getElementById('capturedBackImage').src;\n" +
                 "document.getElementById('captureBack').value = backData;\n" +
+
+                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
+                "var capturedImageContainer=document.getElementById('capturedImageContainer');\n" +
                 "var backImageData = document.createElement('input');\n" +
                 "backImageData.id = 'backImageData';\n" +
                 "backImageData.type = 'hidden';\n" +
                 "backImageData.value = backData;\n" +
-                "document.body.appendChild(backImageData);\n" +
+                "capturedImageContainer.appendChild(backImageData);\n" +
                 "f2();\n" +
-                "}\n" +
+                "}\n" + "}\n" +
                 "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
                 "document.getElementById('captureBackResponse').value = '';\n" +
-                "alert('timeout');\n" +
                 "f2();\n" +
                 "}\n" +
                 "}, 500);\n" +

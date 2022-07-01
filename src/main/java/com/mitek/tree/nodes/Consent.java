@@ -13,7 +13,6 @@ import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.ConfirmationCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
@@ -37,11 +36,14 @@ public class Consent extends SingleOutcomeNode {
 
     List<Callback> cbList = new ArrayList<>();
 
-    private Action collectRegField(String consentData) {
+    private Action collectRegField(String[] consentLines) {
         try {
             logger.debug("*********************Consent node********************");
-            TextOutputCallback textOutputCallback = new TextOutputCallback(0, consentData);
-            cbList.add(textOutputCallback);
+            TextOutputCallback textOutputCallback;
+            for (Integer i = 0; i < consentLines.length; i++) {
+                textOutputCallback = new TextOutputCallback(0, consentLines[i]);
+                cbList.add(textOutputCallback);
+            }
             String[] choices = {"Next"};
             ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
             cbList.add(confirmationCallback);
@@ -64,7 +66,8 @@ public class Consent extends SingleOutcomeNode {
                 return goToNext().build();
             } else {
                 String consentData = sharedState.get(Constants.CONSENT_DATA).asString();
-                return collectRegField(consentData);
+                String consentLines[] = consentData.split("\\\\n");
+                return collectRegField(consentLines);
             }
         } catch (Exception e) {
             logger.error(e.getMessage());

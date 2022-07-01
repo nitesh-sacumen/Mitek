@@ -6,6 +6,7 @@ import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
 import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
+import org.forgerock.util.i18n.PreferredLocales;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,15 +17,16 @@ import javax.security.auth.callback.ConfirmationCallback;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
-@Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationOptions.Config.class)
-public class VerificationOptions extends SingleOutcomeNode {
+@Node.Metadata(outcomeProvider = VerificationOptions.VerificationOptionsOutcomeProvider.class, configClass = VerificationOptions.Config.class)
+public class VerificationOptions implements Node {
 
 
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
-
+    private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOptions";
     /**
      * Configuration for the node.
      */
@@ -70,8 +72,6 @@ public class VerificationOptions extends SingleOutcomeNode {
                     return buildCallbacks();
                 }
             }
-
-
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
                 Integer selectedIndex = Arrays.stream(context.getCallback(ChoiceCallback.class).get().getSelectedIndexes()).findFirst().getAsInt();
 
@@ -79,17 +79,17 @@ public class VerificationOptions extends SingleOutcomeNode {
                 switch (selectedIndex) {
                     case 0:
                         selectedValue = "PASSPORT";
-                        break;
+                        sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
+                        return goTo(VerificationOptionsOutcome.PASSPORT).replaceSharedState(sharedState).build();
                     case 1:
                         selectedValue = "DOCUMENT";
-                        break;
+                        sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
+                        return goTo(VerificationOptionsOutcome.IDDL).replaceSharedState(sharedState).build();
                     default:
                         logger.debug("No option selected/Invalid option. Please try again.");
                         System.out.println("No option selected/Invalid option. Please try again.");
                         return null;
                 }
-                sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
-                return goToNext().build();
             } else {
                 return collectRegField();
             }
@@ -99,6 +99,23 @@ public class VerificationOptions extends SingleOutcomeNode {
             throw new NodeProcessException("Exception is: " + e);
         }
     }
+    private Action.ActionBuilder goTo(VerificationOptions.VerificationOptionsOutcome outcome) {
+        return Action.goTo(outcome.name());
+    }
+    /**
+     * The possible outcomes for the VerificationOptions.
+     */
+    private enum VerificationOptionsOutcome {
+        /**
+         * selection for ID/DL.
+         */
+        IDDL,
+        /**
+         * selection for PASSPORT.
+         */
+        PASSPORT
+    }
+
 
     private Action buildCallbacks() {
         return send(new ArrayList<>() {{
@@ -132,16 +149,21 @@ public class VerificationOptions extends SingleOutcomeNode {
                 "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
                 "document.getElementById('mitekMediaContainer').remove();\n" +
                 "}\n" +
-                "if (document.contains(document.getElementById('frontImage'))) {\n" +
-                "document.getElementById('frontImage').remove();\n" +
+                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
+                "document.getElementById('capturedImageContainer').remove();\n" +
                 "}\n" +
-                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
-                "document.getElementById('selfieImage').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('passportImage'))) {\n" +
-                "document.getElementById('passportImage').remove();\n" +
                 "}\n" +
                 "document.getElementById('loginButton_0').click();";
+    }
+
+    public static class VerificationOptionsOutcomeProvider implements OutcomeProvider {
+        @Override
+        public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
+            ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationOptions.BUNDLE,
+                    VerificationOptions.VerificationOptionsOutcomeProvider.class.getClassLoader());
+            return ImmutableList.of(new Outcome(VerificationOptionsOutcome.IDDL.name(), bundle.getString("idDl")),
+                    new Outcome(VerificationOptionsOutcome.PASSPORT.name(), bundle.getString("passport")));
+        }
     }
 
 }

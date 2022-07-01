@@ -101,7 +101,11 @@ public class VerificationRetry implements Node {
 
     private String getAuthDataScript() {
 
-        return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
+        return "if (document.contains(document.getElementById('footer'))) {\n" +
+                "document.getElementById('footer').style.marginBottom='0px';\n" +
+                "}\n" +
+
+                "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
                 "}\n" +
 
@@ -125,6 +129,9 @@ public class VerificationRetry implements Node {
 
                 "if (document.contains(document.getElementById('hidden'))) {\n" +
                 "document.getElementById('hidden').remove();\n" +
+                "}\n" +
+                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
+                "document.getElementById('capturedImageContainer').remove();\n" +
                 "}\n";
     }
 

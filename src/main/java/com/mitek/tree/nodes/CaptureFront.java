@@ -52,10 +52,16 @@ public class CaptureFront extends SingleOutcomeNode {
                 && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
+
             return buildCallbacks(url, verificationChoice);
         } else {
+            Boolean isVerificationRefresh = false;
+            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
+                isVerificationRefresh = true;
+                sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
+            }
             List<Callback> cbList = new ArrayList<>();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(removeElements());
+            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(removeElements(isVerificationRefresh));
             cbList.add(scriptTextOutputCallback);
             TextOutputCallback textOutputCallback1 = new TextOutputCallback(0, "Capture Front of Document");
             cbList.add(textOutputCallback1);
@@ -70,19 +76,6 @@ public class CaptureFront extends SingleOutcomeNode {
             cbList.add(confirmationCallback);
             return send(ImmutableList.copyOf(cbList)).build();
         }
-
-
-//        if (context.getCallback(HiddenValueCallback.class).isPresent()) {
-//            String isCaptureImage = context.getCallback(HiddenValueCallback.class).get().getValue();
-//            logger.debug("isCaptureImage: "+isCaptureImage);
-//            if (isCaptureImage.equalsIgnoreCase("true")) {
-//                return buildCallbacks(url, verificationChoice);
-//            }
-//            return goToNext().replaceSharedState(sharedState).build();
-//
-//        } else {
-//            return buildCallbacksForCaptureMessage(verificationChoice);
-//        }
     }
 
 
@@ -95,7 +88,7 @@ public class CaptureFront extends SingleOutcomeNode {
 
     }
 
-    private String removeElements() {
+    private String removeElements(Boolean isVerificationRefresh) {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
                 "}\n" +
@@ -120,16 +113,17 @@ public class CaptureFront extends SingleOutcomeNode {
                 "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
                 "document.getElementById('mitekMediaContainer').remove();\n" +
                 "}\n" +
-                "if (document.contains(document.getElementById('frontImage'))) {\n" +
-                "document.getElementById('frontImage').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('selfieImage'))) {\n" +
-                "document.getElementById('selfieImage').remove();\n" +
-                "}\n" +
+                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
+                "document.getElementById('capturedImageContainer').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('capturedImage'))) {\n" +
                 "document.getElementById('capturedImage').remove();\n" + "}\n" +
                 "if (document.contains(document.getElementById('captureFrontResponse'))) {\n" +
-                "document.getElementById('captureFrontResponse').remove();\n" + "}\n";
+                "document.getElementById('captureFrontResponse').remove();\n" + "}\n" +
+                "if(" + isVerificationRefresh + "){\n" +
+                "if (document.contains(document.getElementById('footer'))) {\n" +
+                "document.getElementById('footer').style.marginBottom='0px';\n" +
+                "}\n" +
+                "}\n";
     }
 
     private String getAuthDataScript(String scriptURL, String identityChoice) {
@@ -159,12 +153,16 @@ public class CaptureFront extends SingleOutcomeNode {
                 "var imageData = document.getElementById('capturedImage').src;\n" +
                 "var result = imageData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
                 "if (result === true) {\n" +
+
+                "var capturedImageContainer = document.createElement('div');\n" +
+                "capturedImageContainer.id='capturedImageContainer';\n" +
                 "document.getElementById('captureFrontResponse').value = imageData;\n" +
                 "var frontImage = document.createElement('input');\n" +
                 "frontImage.id = 'frontImage';\n" +
                 "frontImage.type = 'hidden';\n" +
                 "frontImage.value = imageData;\n" +
-                "document.body.appendChild(frontImage);\n" +
+                "capturedImageContainer.appendChild(frontImage);\n" +
+                "document.body.appendChild(capturedImageContainer);\n" +
                 "f2();\n" +
                 "}\n" +
                 "else if(document.getElementById('capturedTimeout').value=='timeout') {\n" +
