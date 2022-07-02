@@ -2,6 +2,10 @@ package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
 
+/**
+ * @author Saucmen(www.sacumen.com)
+ * This class contains js script which will use to get image of passport.
+ */
 public class PassportScript {
     public String getRemoveElements(Boolean isVerificationRefresh) {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
@@ -41,6 +45,7 @@ public class PassportScript {
                 "}\n" +
                 "}\n";
     }
+
     public String getPassportScript(String scriptURL, String verificationChoice) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +

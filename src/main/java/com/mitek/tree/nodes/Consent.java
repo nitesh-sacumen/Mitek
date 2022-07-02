@@ -19,6 +19,10 @@ import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Consent text node with
+ * single outcome. This node will present consent to user and this will be same for all the flows.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Consent.Config.class)
 public class Consent extends SingleOutcomeNode {
 
@@ -39,28 +43,22 @@ public class Consent extends SingleOutcomeNode {
     List<Callback> cbList = new ArrayList<>();
 
     private Action collectRegField(String[] consentLines) {
-        try {
-            logger.debug("*********************Consent node********************");
-            ConsentScript consentScript = new ConsentScript();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(consentScript.getConsentScript());
-            cbList.add(scriptTextOutputCallback);
-            TextOutputCallback textOutputCallback;
-            for (Integer i = 0; i < consentLines.length; i++) {
-                textOutputCallback = new TextOutputCallback(0, consentLines[i]);
-                cbList.add(textOutputCallback);
-            }
-            String[] choices = {"Next"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
-            cbList.add(confirmationCallback);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        ConsentScript consentScript = new ConsentScript();
+        ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(consentScript.getConsentScript());
+        cbList.add(scriptTextOutputCallback);
+        TextOutputCallback textOutputCallback;
+        for (String consentLine : consentLines) {
+            textOutputCallback = new TextOutputCallback(0, consentLine);
+            cbList.add(textOutputCallback);
         }
+        String[] choices = {"Next"};
+        cbList.add(new ConfirmationCallback(0, choices, 0));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
-        logger.debug("*********************Capture node********************");
+        logger.debug("*********************Consent node********************");
         try {
             JsonValue sharedState = context.sharedState;
             if (sharedState.get(Constants.CONSENT_DATA).isNull()) {
@@ -75,7 +73,6 @@ public class Consent extends SingleOutcomeNode {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            e.printStackTrace();
             throw new NodeProcessException("Exception is: " + e);
         }
     }

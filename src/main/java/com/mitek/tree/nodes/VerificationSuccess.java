@@ -16,10 +16,14 @@ import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Verification Success node with
+ * single outcome. This node will render Success message to user.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationSuccess.Config.class)
 public class VerificationSuccess extends SingleOutcomeNode {
-    VerificationSuccessScript verificationSuccessScript = new VerificationSuccessScript();
 
+    VerificationSuccessScript verificationSuccessScript = new VerificationSuccessScript();
     private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
@@ -32,37 +36,26 @@ public class VerificationSuccess extends SingleOutcomeNode {
     List<Callback> cbList = new ArrayList<>();
 
     private Action collectRegField(TreeContext context) {
-        try {
-            TextOutputCallback label1 = new TextOutputCallback(0, "Verification Complete");
-            cbList.add(label1);
-            TextOutputCallback label2 = new TextOutputCallback(0, "Thank you!");
-            cbList.add(label2);
-            TextOutputCallback label3 = new TextOutputCallback(0, "Your verification is complete.");
-            cbList.add(label3);
-            String[] choices = {"Next"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
-            cbList.add(confirmationCallback);
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(verificationSuccessScript.getVerificationSuccessScript());
-            cbList.add(scriptTextOutputCallback);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        cbList.add(getTextOutputCallbackObject("Verification Complete"));
+        cbList.add(getTextOutputCallbackObject("Thank you!"));
+        cbList.add(getTextOutputCallbackObject("Your verification is complete."));
+        String[] choices = {"Next"};
+        cbList.add(new ConfirmationCallback(0, choices, 0));
+        cbList.add(new ScriptTextOutputCallback(verificationSuccessScript.getVerificationSuccessScript()));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationSuccess node********************");
-        try {
-            if ((context.hasCallbacks())) {
-                return goToNext().build();
-            } else {
-                return collectRegField(context);
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-            throw new NodeProcessException("Exception is: " + e);
+        if ((context.hasCallbacks())) {
+            return goToNext().build();
+        } else {
+            return collectRegField(context);
         }
+    }
+
+    private TextOutputCallback getTextOutputCallbackObject(String msg) {
+        return new TextOutputCallback(0, msg);
     }
 }

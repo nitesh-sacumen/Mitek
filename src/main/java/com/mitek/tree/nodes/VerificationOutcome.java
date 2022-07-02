@@ -11,8 +11,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
+/**
+ * @author Saucmen(www.sacumen.com) Verification Outcome node with
+ * 3 outcome. This node will navigate flow based upon verification result.
+ */
 @Node.Metadata(outcomeProvider = VerificationOutcome.MitekOutcomeProvider.class, configClass = VerificationOutcome.Config.class)
 public class VerificationOutcome implements Node {
 
@@ -32,21 +37,14 @@ public class VerificationOutcome implements Node {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationOutcome node********************");
-        try {
-            JsonValue sharedState = context.sharedState;
-            String verification_result = sharedState.get(Constants.VERIFICATION_RESULT).asString();
-            logger.info("Verification result" + verification_result);
-            if (verification_result == Constants.VERIFICATION_SUCCESS) {
-                return goTo(MitekOutcome.SUCCESS).replaceSharedState(sharedState).build();
-            } else if (verification_result == Constants.VERIFICATION_FAILURE) {
-                return goTo(MitekOutcome.FAILURE).replaceSharedState(sharedState).build();
-            } else {
-                return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-            throw new NodeProcessException("Exception is: " + e);
+        JsonValue sharedState = context.sharedState;
+        String verification_result = sharedState.get(Constants.VERIFICATION_RESULT).asString();
+        if (Objects.equals(verification_result, Constants.VERIFICATION_SUCCESS)) {
+            return goTo(MitekOutcome.SUCCESS).replaceSharedState(sharedState).build();
+        } else if (Objects.equals(verification_result, Constants.VERIFICATION_FAILURE)) {
+            return goTo(MitekOutcome.FAILURE).replaceSharedState(sharedState).build();
+        } else {
+            return goTo(MitekOutcome.RETRY).replaceSharedState(sharedState).build();
         }
     }
 

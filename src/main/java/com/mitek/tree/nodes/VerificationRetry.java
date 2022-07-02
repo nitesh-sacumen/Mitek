@@ -23,6 +23,12 @@ import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Verification Retry node with
+ * two outcome - Retry and Retake. This node will render retry message to user.
+ * Retry - Retry will force user to retry entire flow.
+ * Retake - Retake will force user to retake image again.
+ */
 @Node.Metadata(outcomeProvider = VerificationRetry.OutcomeProvider.class, configClass = VerificationRetry.Config.class)
 public class VerificationRetry implements Node {
     VerificationRetryScript verificationRetryScript = new VerificationRetryScript();
@@ -39,60 +45,45 @@ public class VerificationRetry implements Node {
     List<Callback> cbList = new ArrayList<>();
 
     private Action collectRegField(TreeContext context) {
-        try {
-            TextOutputCallback label1 = new TextOutputCallback(0, "Verification Error");
-            cbList.add(label1);
-            TextOutputCallback label2 = new TextOutputCallback(0, "Oops! There was an issue on the captured image.");
-            cbList.add(label2);
-            TextOutputCallback label3 = new TextOutputCallback(0, "We would like you to retry.");
-            cbList.add(label3);
-            TextOutputCallback label4 = new TextOutputCallback(0, "Tips for retake.");
-            cbList.add(label4);
-            TextOutputCallback label5 = new TextOutputCallback(0, "Make sure the lighting is proper.");
-            cbList.add(label5);
-            TextOutputCallback label6 = new TextOutputCallback(0, "Use dark background.");
-            cbList.add(label6);
-            String[] choices = {"Retry"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, choices, 0);
-            cbList.add(confirmationCallback);
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(verificationRetryScript.getVerificationRetryScript());
-            cbList.add(scriptTextOutputCallback);
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        cbList.add(getTextOutputCallbackObject("Verification Error"));
+        cbList.add(getTextOutputCallbackObject("Oops! There was an issue on the captured image."));
+        cbList.add(getTextOutputCallbackObject("We would like you to retry."));
+        cbList.add(getTextOutputCallbackObject("Tips for retake."));
+        cbList.add(getTextOutputCallbackObject("Make sure the lighting is proper."));
+        cbList.add(getTextOutputCallbackObject("Use dark background."));
+        String[] choices = {"Retry"};
+        cbList.add(new ConfirmationCallback(0, choices, 0));
+        cbList.add(new ScriptTextOutputCallback(verificationRetryScript.getVerificationRetryScript()));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationRetry node********************");
-        try {
-            JsonValue sharedState = context.sharedState;
-            if (sharedState.get(Constants.RETRY_COUNT).isNull()) {
-                sharedState.put(Constants.RETRY_COUNT, 0);
-            } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == 3) {
-                return goTo(VerificationRetryOutcome.Reject).replaceSharedState(sharedState).build();
-            }
-
-            if ((context.hasCallbacks())) {
-                Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
-                retryCount++;
-                sharedState.put(Constants.RETRY_COUNT, retryCount);
-                sharedState.put(Constants.RETAKE_COUNT, 0);
-                return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();
-            } else {
-                return collectRegField(context);
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-            throw new NodeProcessException("Exception is: " + e);
+        JsonValue sharedState = context.sharedState;
+        if (sharedState.get(Constants.RETRY_COUNT).isNull()) {
+            sharedState.put(Constants.RETRY_COUNT, 0);
+        } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == Constants.RETRY_COUNT_VALUE) {
+            return goTo(VerificationRetryOutcome.Reject).replaceSharedState(sharedState).build();
+        }
+        if ((context.hasCallbacks())) {
+            Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
+            retryCount++;
+            sharedState.put(Constants.RETRY_COUNT, retryCount);
+            sharedState.put(Constants.RETAKE_COUNT, 0);
+            return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();
+        } else {
+            return collectRegField(context);
         }
     }
 
 
     private Action.ActionBuilder goTo(VerificationRetry.VerificationRetryOutcome outcome) {
         return Action.goTo(outcome.name());
+    }
+
+    private TextOutputCallback getTextOutputCallbackObject(String msg) {
+        return new TextOutputCallback(0, msg);
     }
 
     /**

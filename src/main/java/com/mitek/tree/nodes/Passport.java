@@ -23,6 +23,10 @@ import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Passport node with
+ * single outcome. This node will capture image of passport document.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Passport.Config.class)
 public class Passport extends SingleOutcomeNode {
     PassportScript passportScript = new PassportScript();
@@ -45,13 +49,10 @@ public class Passport extends SingleOutcomeNode {
     public Action process(TreeContext context) {
         logger.debug("*********************Passport node********************");
         JsonValue sharedState = context.sharedState;
-        String verificationChoice = "PASSPORT";
-        String url = "/mitek/p1.js";
-        if (context.getCallback(HiddenValueCallback.class).isPresent()
-                && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+        if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
-            return buildCallbacks(url, verificationChoice);
+            return buildCallbacks(Constants.JS_URL, Constants.PASSPORT_VERIFICATION_OPTION);
         } else {
             Boolean isVerificationRefresh = false;
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
@@ -59,19 +60,13 @@ public class Passport extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(passportScript.getRemoveElements(isVerificationRefresh));
-            cbList.add(scriptTextOutputCallback);
-            TextOutputCallback textOutputCallback1 = new TextOutputCallback(0, "Capture Passport");
-            cbList.add(textOutputCallback1);
-            TextOutputCallback textOutputCallback2 = new TextOutputCallback(0, "* Use dark background");
-            cbList.add(textOutputCallback2);
-            TextOutputCallback textOutputCallback3 = new TextOutputCallback(0, "* Get all 4 corners of the bio-data page within the frame");
-            cbList.add(textOutputCallback3);
-            TextOutputCallback textOutputCallback4 = new TextOutputCallback(0, "* Make sure lighting is good");
-            cbList.add(textOutputCallback4);
+            cbList.add(new ScriptTextOutputCallback(passportScript.getRemoveElements(isVerificationRefresh)));
+            cbList.add(getTextOutputCallbackObject("Capture Passport"));
+            cbList.add(getTextOutputCallbackObject("* Use dark background"));
+            cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));
+            cbList.add(getTextOutputCallbackObject("* Make sure lighting is good"));
             String[] submitButton = {"Capture Passport"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
-            cbList.add(confirmationCallback);
+            cbList.add(new ConfirmationCallback(0, submitButton, 0));
             return send(ImmutableList.copyOf(cbList)).build();
         }
     }
@@ -82,5 +77,9 @@ public class Passport extends SingleOutcomeNode {
             add(new ScriptTextOutputCallback(passportScript.getPassportScript(url, verificationChoice)));
             add(new HiddenValueCallback("capturePassportResponse"));
         }}).build();
+    }
+
+    private TextOutputCallback getTextOutputCallbackObject(String msg) {
+        return new TextOutputCallback(0, msg);
     }
 }

@@ -19,34 +19,32 @@ import java.util.ArrayList;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Selfie node with
+ * single outcome. This node will capture selfie image.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Selfie.Config.class)
 public class Selfie extends SingleOutcomeNode {
-SelfieScript selfieScript=new SelfieScript();
+    SelfieScript selfieScript = new SelfieScript();
 
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
     /**
      * Configuration for the node.
      */
-    public interface Config {
-
-    }
+    public interface Config {}
 
     @Inject
-    public Selfie() {
-
-    }
+    public Selfie() {}
 
     @Override
     public Action process(TreeContext context) {
         logger.debug("*********************Selfie node********************");
         JsonValue sharedState = context.sharedState;
-        String verificationChoice = "SELFIE";
-        String url = "/mitek/p1.js";
         if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         }
-        return buildCallbacks(url, verificationChoice);
+        return buildCallbacks(Constants.JS_URL, Constants.SELFIE_VERIFICATION_OPTION);
     }
 
     private Action buildCallbacks(String url, String verificationChoice) {

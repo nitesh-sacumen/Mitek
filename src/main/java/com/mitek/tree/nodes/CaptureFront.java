@@ -23,6 +23,10 @@ import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Capture Front node with
+ * single outcome. This node will capture front image of ID/DL document.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureFront.Config.class)
 public class CaptureFront extends SingleOutcomeNode {
     CaptureFrontScript captureFrontScript = new CaptureFrontScript();
@@ -45,13 +49,10 @@ public class CaptureFront extends SingleOutcomeNode {
     public Action process(TreeContext context) {
         logger.debug("*********************Capture front********************");
         JsonValue sharedState = context.sharedState;
-        String verificationChoice = "DOCUMENT";
-        String url = "/mitek/p1.js";
-        if (context.getCallback(HiddenValueCallback.class).isPresent()
-                && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+        if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
-            return buildCallbacks(url, verificationChoice);
+            return buildCallbacks(Constants.JS_URL, Constants.DOCUMENT_VERIFICATION_OPTION);
         } else {
             Boolean isVerificationRefresh = false;
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
@@ -59,19 +60,13 @@ public class CaptureFront extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(captureFrontScript.getRemoveElements(isVerificationRefresh));
-            cbList.add(scriptTextOutputCallback);
-            TextOutputCallback textOutputCallback1 = new TextOutputCallback(0, "Capture Front of Document");
-            cbList.add(textOutputCallback1);
-            TextOutputCallback textOutputCallback2 = new TextOutputCallback(0, "* Use dark background");
-            cbList.add(textOutputCallback2);
-            TextOutputCallback textOutputCallback3 = new TextOutputCallback(0, "* Get all 4 corners of the bio-data page within the frame");
-            cbList.add(textOutputCallback3);
-            TextOutputCallback textOutputCallback4 = new TextOutputCallback(0, "* Make sure lighting is good");
-            cbList.add(textOutputCallback4);
+            cbList.add(new ScriptTextOutputCallback(captureFrontScript.getRemoveElements(isVerificationRefresh)));
+            cbList.add(getTextOutputCallbackObject("Capture Front of Document"));
+            cbList.add(getTextOutputCallbackObject(" Use dark background"));
+            cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));
+            cbList.add(getTextOutputCallbackObject("* Make sure lighting is good"));
             String[] submitButton = {"Capture Front of Document"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
-            cbList.add(confirmationCallback);
+            cbList.add(new ConfirmationCallback(0, submitButton, 0));
             return send(ImmutableList.copyOf(cbList)).build();
         }
     }
@@ -83,6 +78,10 @@ public class CaptureFront extends SingleOutcomeNode {
             add(new HiddenValueCallback("captureFrontResponse"));
         }}).build();
 
+    }
+
+    private TextOutputCallback getTextOutputCallbackObject(String msg) {
+        return new TextOutputCallback(0, msg);
     }
 
 }

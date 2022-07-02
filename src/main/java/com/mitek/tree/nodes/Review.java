@@ -24,6 +24,13 @@ import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Review node with
+ * two outcome. This node will verify captured images for passport, selfie and DL/ID.
+ * This node contains two outcome - Retake and Wait.
+ * Retke will agian force user to retake image
+ * Wait will connect to next node after verification result.
+ */
 @Node.Metadata(outcomeProvider = Review.ReviewOutcomeProvider.class, configClass = Review.Config.class)
 public class Review implements Node {
 
@@ -54,8 +61,8 @@ public class Review implements Node {
             String isRetake = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
             sharedState.put("isRetake", isRetake);
             if (isRetake.equalsIgnoreCase("true")) {
-                sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 logger.debug("Retaking image.......");
+                sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 retakeCount++;
                 sharedState.put(Constants.RETAKE_COUNT, retakeCount);
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
@@ -70,7 +77,7 @@ public class Review implements Node {
                 }
                 AccessToken token = new AccessToken();
                 String accessToken = token.getAccessToken(context);
-                if (accessToken != "") {
+                if (accessToken != null) {
                     VerifyDocument verifyDocument = new VerifyDocument();
                     verifyDocument.verify(accessToken, frontData, selfieData, passportData, backImageCode, context);
                 }

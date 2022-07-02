@@ -2,6 +2,10 @@ package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
 
+/**
+ * @author Saucmen(www.sacumen.com)
+ * This class contains js script which will use to get front side image of document.
+ */
 public class CaptureFrontScript {
     public String getRemoveElements(Boolean isVerificationRefresh) {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
@@ -40,6 +44,7 @@ public class CaptureFrontScript {
                 "}\n" +
                 "}\n";
     }
+
     public String getCaptureFrontScript(String scriptURL, String identityChoice) {
         return "if (document.contains(document.getElementById('captureSelfieResponse'))) {\n" +
                 "document.getElementById('captureSelfieResponse').remove();\n" + "}\n" +

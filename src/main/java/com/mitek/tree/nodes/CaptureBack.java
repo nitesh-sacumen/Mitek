@@ -23,9 +23,14 @@ import java.util.List;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+
+/**
+ * @author Saucmen(www.sacumen.com) Capture Back node with
+ * single outcome. This node will capture back image of ID/DL document.
+ */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureBack.Config.class)
 public class CaptureBack extends SingleOutcomeNode {
-    CaptureBackScript captureBackScript=new CaptureBackScript();
+    CaptureBackScript captureBackScript = new CaptureBackScript();
 
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
@@ -33,7 +38,6 @@ public class CaptureBack extends SingleOutcomeNode {
      * Configuration for the node.
      */
     public interface Config {
-
     }
 
     @Inject
@@ -45,33 +49,25 @@ public class CaptureBack extends SingleOutcomeNode {
     public Action process(TreeContext context) {
         logger.debug("*********************Capture back********************");
         JsonValue sharedState = context.sharedState;
-        String verificationChoice = "PDF417_BARCODE";
-        String url = "/mitek/p1.js";
-        if (context.getCallback(HiddenValueCallback.class).isPresent()
-                && context.getCallbacks(HiddenValueCallback.class).get(0).getValue().contains("*")) {
+        if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallbacks(HiddenValueCallback.class).get(0).getValue().contains("*")) {
             String backImageCode = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
             sharedState.put(Constants.PDF_417_CODE, backImageCode);
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
-            return buildCallbacks(url, verificationChoice);
+            return buildCallbacks(Constants.JS_URL, Constants.BACK_VERIFICATION_OPTION);
         } else {
             List<Callback> cbList = new ArrayList<>();
-            ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(captureBackScript.getremoveElements());
-            cbList.add(scriptTextOutputCallback);
-            TextOutputCallback textOutputCallback1 = new TextOutputCallback(0, "Capture Back of Document");
-            cbList.add(textOutputCallback1);
-            TextOutputCallback textOutputCallback2 = new TextOutputCallback(0, "* Use dark background");
-            cbList.add(textOutputCallback2);
-            TextOutputCallback textOutputCallback3 = new TextOutputCallback(0, "* Get all 4 corners of the bio-data page within the frame");
-            cbList.add(textOutputCallback3);
-            TextOutputCallback textOutputCallback4 = new TextOutputCallback(0, "* Make sure lighting is good");
-            cbList.add(textOutputCallback4);
+            cbList.add(new ScriptTextOutputCallback(captureBackScript.getremoveElements()));
+            cbList.add(getTextOutputCallbackObject("Capture Back of Document"));
+            cbList.add(getTextOutputCallbackObject("* Use dark background"));
+            cbList.add(getTextOutputCallbackObject("** Get all 4 corners of the bio-data page within the frame"));
+            cbList.add(getTextOutputCallbackObject("* Make sure lighting is good"));
             String[] submitButton = {"Capture Back of Document"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
-            cbList.add(confirmationCallback);
+            cbList.add(new ConfirmationCallback(0, submitButton, 0));
             return send(ImmutableList.copyOf(cbList)).build();
         }
     }
+
     private Action buildCallbacks(String url, String verificationChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image back capture, it will be displayed shortly for preview."));
@@ -79,5 +75,9 @@ public class CaptureBack extends SingleOutcomeNode {
             add(new HiddenValueCallback("captureBackResponse"));
             add(new HiddenValueCallback("captureBack"));
         }}).build();
+    }
+
+    private TextOutputCallback getTextOutputCallbackObject(String msg){
+       return new TextOutputCallback(0, msg);
     }
 }

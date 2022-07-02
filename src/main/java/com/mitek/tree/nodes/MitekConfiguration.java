@@ -12,9 +12,8 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 
 /**
- * @author Sacumen (www.sacumen.com)
- * <p>
- * Setting and adding all the Prove Service URLs to the shared state.
+ * @author Saucmen(www.sacumen.com) Mitek configuration node with
+ * single outcome. This node will get mitek configuration and put it thorugh shared context.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = MitekConfiguration.Config.class)
 public class MitekConfiguration extends SingleOutcomeNode {
@@ -57,8 +56,7 @@ public class MitekConfiguration extends SingleOutcomeNode {
         JsonValue sharedState = context.sharedState;
         if (config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
             logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
-            System.out.println("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
-            return null;
+            throw new NodeProcessException("Invalid credentials!!");
         }
         sharedState.put(Constants.CLIENT_ID, config.clientId());
         sharedState.put(Constants.CLIENT_SECRET, config.clientSecret());

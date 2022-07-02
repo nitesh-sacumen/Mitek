@@ -22,6 +22,12 @@ import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
 
+/**
+ * @author Saucmen(www.sacumen.com) Verification option node with
+ * two outcome DL/ID and Passport. This node will get document type from user.
+ * DL/ID - This will redirect to DL/ID flow.
+ * Passport - This will redirect to passport flow.
+ */
 @Node.Metadata(outcomeProvider = VerificationOptions.VerificationOptionsOutcomeProvider.class, configClass = VerificationOptions.Config.class)
 public class VerificationOptions implements Node {
     VerificationOptionsScript verificationOptionsScript = new VerificationOptionsScript();
@@ -43,17 +49,10 @@ public class VerificationOptions implements Node {
     private Action collectRegField() {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
-        try {
-            String[] choices = {"Passport", "DL/ID"};
-            ChoiceCallback verificationOptions = new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false);
-            cbList.add(verificationOptions);
-            String[] submitButton = {"Next"};
-            ConfirmationCallback confirmationCallback = new ConfirmationCallback(0, submitButton, 0);
-            cbList.add(confirmationCallback);
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        }
+        String[] choices = {"Passport", "DL/ID"};
+        cbList.add(new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false));
+        String[] submitButton = {"Next"};
+        cbList.add(new ConfirmationCallback(0, submitButton, 0));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
@@ -75,23 +74,22 @@ public class VerificationOptions implements Node {
                 String selectedValue;
                 switch (selectedIndex) {
                     case 0:
-                        selectedValue = "PASSPORT";
+                        selectedValue = Constants.PASSPORT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                         return goTo(VerificationOptionsOutcome.PASSPORT).replaceSharedState(sharedState).build();
                     case 1:
-                        selectedValue = "DOCUMENT";
+                        selectedValue = Constants.DOCUMENT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                         return goTo(VerificationOptionsOutcome.IDDL).replaceSharedState(sharedState).build();
                     default:
-                        logger.debug("No option selected/Invalid option. Please try again.");
-                        return null;
+                        logger.error("No option selected/Invalid option. Please try again.");
+                        throw new NodeProcessException("No option selected!!");
                 }
             } else {
                 return collectRegField();
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            e.printStackTrace();
             throw new NodeProcessException("Exception is: " + e);
         }
     }
