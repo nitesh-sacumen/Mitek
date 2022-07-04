@@ -33,9 +33,14 @@ public class VerificationSuccess extends SingleOutcomeNode {
 
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     * Display text to user and collect user choice for success.
+     */
     private Action collectRegField(TreeContext context) {
+        List<Callback> cbList = new ArrayList<>();
         cbList.add(getTextOutputCallbackObject("Verification Complete"));
         cbList.add(getTextOutputCallbackObject("Thank you!"));
         cbList.add(getTextOutputCallbackObject("Your verification is complete."));
@@ -45,6 +50,10 @@ public class VerificationSuccess extends SingleOutcomeNode {
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationSuccess node********************");
@@ -55,6 +64,10 @@ public class VerificationSuccess extends SingleOutcomeNode {
         }
     }
 
+    /**
+     * @param msg Message that needs to be rendered to the user.
+     * @return Text output callback
+     */
     private TextOutputCallback getTextOutputCallbackObject(String msg) {
         return new TextOutputCallback(0, msg);
     }

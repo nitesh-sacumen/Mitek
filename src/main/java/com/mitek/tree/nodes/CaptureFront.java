@@ -45,6 +45,10 @@ public class CaptureFront extends SingleOutcomeNode {
 
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) {
         logger.debug("*********************Capture front********************");
@@ -71,6 +75,11 @@ public class CaptureFront extends SingleOutcomeNode {
         }
     }
 
+    /**
+     * @param url            A path for javascript file.
+     * @param identityChoice Type of verification eg: Passport/selfie/DL/ID
+     * @return Action, Which will redirect to next action.
+     */
     private Action buildCallbacks(String url, String identityChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image front capture, it will be displayed shortly for preview."));
@@ -80,6 +89,10 @@ public class CaptureFront extends SingleOutcomeNode {
 
     }
 
+    /**
+     * @param msg Message that needs to be rendered to the user.
+     * @return Text output callback
+     */
     private TextOutputCallback getTextOutputCallbackObject(String msg) {
         return new TextOutputCallback(0, msg);
     }

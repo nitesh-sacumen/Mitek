@@ -32,11 +32,17 @@ public class Selfie extends SingleOutcomeNode {
     /**
      * Configuration for the node.
      */
-    public interface Config {}
+    public interface Config {
+    }
 
     @Inject
-    public Selfie() {}
+    public Selfie() {
+    }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) {
         logger.debug("*********************Selfie node********************");
@@ -47,6 +53,11 @@ public class Selfie extends SingleOutcomeNode {
         return buildCallbacks(Constants.JS_URL, Constants.SELFIE_VERIFICATION_OPTION);
     }
 
+    /**
+     * @param url                A path for javascript file.
+     * @param verificationChoice Type of verification eg: Passport/selfie/DL/ID
+     * @return Action, Which will redirect to next action.
+     */
     private Action buildCallbacks(String url, String verificationChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after selfie image capture, it will be displayed shortly for preview."));

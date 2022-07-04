@@ -46,6 +46,11 @@ public class VerificationOptions implements Node {
     public VerificationOptions() {
     }
 
+    /**
+     * Get document selection choice from user.
+     *
+     * @return Action, Which will redirect to next action.
+     */
     private Action collectRegField() {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
@@ -56,6 +61,10 @@ public class VerificationOptions implements Node {
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         try {
@@ -120,7 +129,15 @@ public class VerificationOptions implements Node {
     }
 
 
+    /**
+     * This class will create customized outcome for the node.
+     */
     public static class VerificationOptionsOutcomeProvider implements OutcomeProvider {
+        /**
+         * @param locales        Local property file for configuration.
+         * @param nodeAttributes Node attributes for outcomes
+         * @return List of possible outcomes.
+         */
         @Override
         public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
             ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationOptions.BUNDLE,

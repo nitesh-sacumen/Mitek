@@ -40,9 +40,13 @@ public class Consent extends SingleOutcomeNode {
     public Consent() {
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
+    /**
+     * @param consentLines Consent text
+     * @return Action, Which will redirect to next action.
+     */
     private Action collectRegField(String[] consentLines) {
+        List<Callback> cbList = new ArrayList<>();
         ConsentScript consentScript = new ConsentScript();
         ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(consentScript.getConsentScript());
         cbList.add(scriptTextOutputCallback);
@@ -56,24 +60,23 @@ public class Consent extends SingleOutcomeNode {
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Consent node********************");
-        try {
-            JsonValue sharedState = context.sharedState;
-            if (sharedState.get(Constants.CONSENT_DATA).isNull()) {
-                logger.debug("skipping consent node as no data provided");
-                return goToNext().build();
-            } else if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {
-                return goToNext().build();
-            } else {
-                String consentData = sharedState.get(Constants.CONSENT_DATA).asString();
-                String consentLines[] = consentData.split("\\\\n");
-                return collectRegField(consentLines);
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new NodeProcessException("Exception is: " + e);
+        JsonValue sharedState = context.sharedState;
+        if (sharedState.get(Constants.CONSENT_DATA).isNull()) {
+            logger.debug("skipping consent node as no data provided");
+            return goToNext().build();
+        } else if ((!context.getCallback(ConfirmationCallback.class).isEmpty()) && context.getCallback(ConfirmationCallback.class).get().getSelectedIndex() == 0) {
+            return goToNext().build();
+        } else {
+            String consentData = sharedState.get(Constants.CONSENT_DATA).asString();
+            String consentLines[] = consentData.split("\\\\n");
+            return collectRegField(consentLines);
         }
     }
 }

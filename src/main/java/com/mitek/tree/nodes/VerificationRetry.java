@@ -42,9 +42,14 @@ public class VerificationRetry implements Node {
 
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     * Display text to user and collect user choice for retry.
+     */
     private Action collectRegField(TreeContext context) {
+        List<Callback> cbList = new ArrayList<>();
         cbList.add(getTextOutputCallbackObject("Verification Error"));
         cbList.add(getTextOutputCallbackObject("Oops! There was an issue on the captured image."));
         cbList.add(getTextOutputCallbackObject("We would like you to retry."));
@@ -57,6 +62,10 @@ public class VerificationRetry implements Node {
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationRetry node********************");
@@ -78,13 +87,22 @@ public class VerificationRetry implements Node {
     }
 
 
+    /**
+     * @param outcome Node outcome
+     * @return Next node
+     */
     private Action.ActionBuilder goTo(VerificationRetry.VerificationRetryOutcome outcome) {
         return Action.goTo(outcome.name());
     }
 
+    /**
+     * @param msg Message that needs to be rendered to the user.
+     * @return Text output callback
+     */
     private TextOutputCallback getTextOutputCallbackObject(String msg) {
         return new TextOutputCallback(0, msg);
     }
+
 
     /**
      * The possible outcomes for the VerificationRetry.
@@ -100,7 +118,16 @@ public class VerificationRetry implements Node {
         Reject
     }
 
+
+    /**
+     * This class will create customized outcome for the node.
+     */
     public static class OutcomeProvider implements org.forgerock.openam.auth.node.api.OutcomeProvider {
+        /**
+         * @param locales        Local property file for configuration.
+         * @param nodeAttributes Node attributes for outcomes
+         * @return List of possible outcomes.
+         */
         @Override
         public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
             ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationRetry.BUNDLE, VerificationRetry.OutcomeProvider.class.getClassLoader());

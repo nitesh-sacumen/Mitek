@@ -34,6 +34,10 @@ public class VerificationOutcome implements Node {
     public VerificationOutcome() {
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationOutcome node********************");
@@ -48,6 +52,10 @@ public class VerificationOutcome implements Node {
         }
     }
 
+    /**
+     * @param outcome Node outcome
+     * @return Next node
+     */
     private Action.ActionBuilder goTo(MitekOutcome outcome) {
         return Action.goTo(outcome.name());
     }
@@ -75,6 +83,11 @@ public class VerificationOutcome implements Node {
      * Defines the possible outcomes from this VerificationOutcome node.
      */
     public static class MitekOutcomeProvider implements OutcomeProvider {
+        /**
+         * @param locales        Local property file for configuration.
+         * @param nodeAttributes Node attributes for outcomes
+         * @return List of possible outcomes.
+         */
         @Override
         public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
             ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationOutcome.BUNDLE,

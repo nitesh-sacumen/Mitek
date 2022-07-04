@@ -51,6 +51,10 @@ public class MitekConfiguration extends SingleOutcomeNode {
         this.config = config;
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;

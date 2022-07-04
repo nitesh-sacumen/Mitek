@@ -33,17 +33,21 @@ import java.util.stream.Collectors;
 public class AccessToken {
     private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
 
+    /**
+     * @param context TreeContext object
+     * @return Access token
+     * @throws NodeProcessException
+     */
     public String getAccessToken(TreeContext context) throws NodeProcessException {
         String accessToken = null;
 
         try (CloseableHttpClient httpclient = getHttpClient()) {
             HttpPost httpPost = createPostRequest(Constants.API_TOKEN_URL);
-            addParamsToPostRequest(context,httpPost);
+            addParamsToPostRequest(context, httpPost);
 
             CloseableHttpResponse response = httpclient.execute(httpPost);
 
             Integer responseCode = response.getStatusLine().getStatusCode();
-            logger.debug("Access token response code: " + responseCode);
             HttpEntity entityResponse = response.getEntity();
             String result = EntityUtils.toString(entityResponse);
 
@@ -56,15 +60,25 @@ public class AccessToken {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new NodeProcessException("Caught exception while generating access token: "+e.getMessage());
+            throw new NodeProcessException("Caught exception while generating access token: " + e.getMessage());
         }
         return accessToken;
     }
 
+    /**
+     * Building http client with default configuration
+     *
+     * @return Http client
+     */
     public CloseableHttpClient getHttpClient() {
         return buildDefaultClient();
     }
 
+    /**
+     * Building http client with explicit configuration
+     *
+     * @return
+     */
     public CloseableHttpClient buildDefaultClient() {
         logger.debug("requesting http client connection client open");
         Integer timeout = Constants.REQUEST_TIMEOUT;
@@ -73,11 +87,24 @@ public class AccessToken {
         return clientBuilder.setDefaultRequestConfig(config).build();
     }
 
+    /**
+     * Initializing http post object
+     *
+     * @param url URL for post request
+     * @return Http post object
+     */
     private HttpPost createPostRequest(String url) {
         return new HttpPost(url);
     }
 
-    private void addParamsToPostRequest(TreeContext context,HttpPost httpPost) throws UnsupportedEncodingException {
+    /**
+     * Adding header parameter to Http post request
+     *
+     * @param context  TreeContext forgerock SDK Object
+     * @param httpPost Http post object
+     * @throws UnsupportedEncodingException
+     */
+    private void addParamsToPostRequest(TreeContext context, HttpPost httpPost) throws UnsupportedEncodingException {
         JsonValue sharedState = context.sharedState;
         String clientId = sharedState.get(Constants.CLIENT_ID).asString();
         String clientSecret = sharedState.get(Constants.CLIENT_SECRET).asString();

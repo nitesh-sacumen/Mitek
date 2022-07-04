@@ -33,9 +33,14 @@ public class VerificationFailure extends SingleOutcomeNode {
     public interface Config {
     }
 
-    List<Callback> cbList = new ArrayList<>();
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     * Display text to user and collect user choice for customer support or call support.
+     */
     private Action collectRegField(TreeContext context) {
+        List<Callback> cbList = new ArrayList<>();
         cbList.add(getTextOutputCallbackObject("Verification Pending"));
         cbList.add(getTextOutputCallbackObject("More details are needed to complete your verification"));
         JsonValue sharedState = context.sharedState;
@@ -52,6 +57,10 @@ public class VerificationFailure extends SingleOutcomeNode {
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
+    /**
+     * @param context
+     * @return Action, Which will redirect to next action.
+     */
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************VerificationFailure node********************");
@@ -62,6 +71,10 @@ public class VerificationFailure extends SingleOutcomeNode {
         }
     }
 
+    /**
+     * @param msg Message that needs to be rendered to the user.
+     * @return Text output callback
+     */
     private TextOutputCallback getTextOutputCallbackObject(String msg) {
         return new TextOutputCallback(0, msg);
     }
