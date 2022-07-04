@@ -31,7 +31,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class CaptureFront extends SingleOutcomeNode {
     CaptureFrontScript captureFrontScript = new CaptureFrontScript();
 
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(CaptureFront.class);
 
     /**
      * Configuration for the node.

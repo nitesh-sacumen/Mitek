@@ -35,7 +35,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Review implements Node {
 
     private static final String BUNDLE = "com/mitek/tree/nodes/Review";
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(Review.class);
 
     /**
      * Configuration for the node.

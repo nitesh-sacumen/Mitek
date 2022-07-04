@@ -32,7 +32,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class CaptureBack extends SingleOutcomeNode {
     CaptureBackScript captureBackScript = new CaptureBackScript();
 
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(CaptureBack.class);
 
     /**
      * Configuration for the node.

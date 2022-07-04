@@ -25,7 +25,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationFailure.Config.class)
 public class VerificationFailure extends SingleOutcomeNode {
     VerificationFailureScript verificationFailureScript = new VerificationFailureScript();
-    private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private Logger logger = LoggerFactory.getLogger(VerificationFailure.class);
 
     /**
      * Configuration for the node.

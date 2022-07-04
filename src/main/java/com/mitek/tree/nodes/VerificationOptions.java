@@ -32,7 +32,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationOptions implements Node {
     VerificationOptionsScript verificationOptionsScript = new VerificationOptionsScript();
 
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(VerificationOptions.class);
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOptions";
 
     /**

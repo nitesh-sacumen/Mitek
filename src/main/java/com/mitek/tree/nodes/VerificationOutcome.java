@@ -24,7 +24,7 @@ public class VerificationOutcome implements Node {
     /**
      * Configuration for the node.
      */
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static Logger logger = LoggerFactory.getLogger(VerificationOutcome.class);
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOutcome";
 
     public interface Config {

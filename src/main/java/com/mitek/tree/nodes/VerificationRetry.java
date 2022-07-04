@@ -33,7 +33,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationRetry implements Node {
     VerificationRetryScript verificationRetryScript = new VerificationRetryScript();
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationRetry";
-    private Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private Logger logger = LoggerFactory.getLogger(VerificationRetry.class);
 
     /**
      * Configuration for the node.
