@@ -3,9 +3,9 @@ package com.mitek.tree.nodes;
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.util.CaptureBackScript;
+import com.mitek.tree.util.RemoveElements;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
@@ -30,7 +30,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureBack.Config.class)
 public class CaptureBack extends SingleOutcomeNode {
-    CaptureBackScript captureBackScript = new CaptureBackScript();
 
     private static final Logger logger = LoggerFactory.getLogger(CaptureBack.class);
 
@@ -61,7 +60,7 @@ public class CaptureBack extends SingleOutcomeNode {
             return buildCallbacks(Constants.JS_URL, Constants.BACK_VERIFICATION_OPTION);
         } else {
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(captureBackScript.removeElements()));
+            cbList.add(new ScriptTextOutputCallback(RemoveElements.removeElements()));
             cbList.add(getTextOutputCallbackObject("Capture Back of Document"));
             cbList.add(getTextOutputCallbackObject("* Use dark background"));
             cbList.add(getTextOutputCallbackObject("** Get all 4 corners of the bio-data page within the frame"));
@@ -80,7 +79,7 @@ public class CaptureBack extends SingleOutcomeNode {
     private Action buildCallbacks(String url, String verificationChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image back capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(captureBackScript.getCaptureBackScript(url, verificationChoice)));
+            add(new ScriptTextOutputCallback(CaptureBackScript.getCaptureBackScript(url, verificationChoice)));
             add(new HiddenValueCallback("captureBackResponse"));
             add(new HiddenValueCallback("captureBack"));
         }}).build();

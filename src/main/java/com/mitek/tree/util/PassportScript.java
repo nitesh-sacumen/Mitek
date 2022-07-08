@@ -7,46 +7,16 @@ import com.mitek.tree.config.Constants;
  * This class contains js script which will use to get image of passport.
  */
 public class PassportScript {
-    public String removeElements(Boolean isVerificationRefresh) {
-        return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
-                "document.getElementById('parentDiv').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorDocTypeInput'))) {\n" +
-                "document.getElementById('integratorDocTypeInput').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('capturedTimeout'))) {\n" +
-                "document.getElementById('capturedTimeout').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('mitekScript'))) {\n" +
-                "document.getElementById('mitekScript').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorAutoCaptureButton'))) {\n" +
-                "document.getElementById('integratorAutoCaptureButton').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('integratorManualCaptureButton'))) {\n" +
-                "document.getElementById('integratorManualCaptureButton').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('uiContainer'))) {\n" +
-                "document.getElementById('uiContainer').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('mitekMediaContainer'))) {\n" +
-                "document.getElementById('mitekMediaContainer').remove();\n" +
-                "}\n" +
-                "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
-                "document.getElementById('capturedImageContainer').remove();\n" + "}\n" +
-
-                "if (document.contains(document.getElementById('capturedImage'))) {\n" +
-                "document.getElementById('capturedImage').remove();\n" + "}\n" +
-                "if (document.contains(document.getElementById('captureFrontResponse'))) {\n" +
-                "document.getElementById('captureFrontResponse').remove();\n" + "}\n" +
+    public static String getScript(Boolean isVerificationRefresh) {
+        String removeScript = RemoveElements.removeElements();
+        String footerScript = FooterScript.getFooterScript();
+        return removeScript +
                 "if(" + isVerificationRefresh + "){\n" +
-                "if (document.contains(document.getElementById('footer'))) {\n" +
-                "document.getElementById('footer').style.marginBottom='0px';\n" +
-                "}\n" +
+                footerScript +
                 "}\n";
     }
 
-    public String getPassportScript(String scriptURL, String verificationChoice) {
+    public static String getPassportScript(String scriptURL, String verificationChoice) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +

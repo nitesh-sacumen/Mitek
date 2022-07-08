@@ -3,7 +3,6 @@ package com.mitek.tree.nodes;
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.util.VerificationSuccessScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationSuccess.Config.class)
 public class VerificationSuccess extends SingleOutcomeNode {
 
-    VerificationSuccessScript verificationSuccessScript = new VerificationSuccessScript();
     private static final Logger logger = LoggerFactory.getLogger(VerificationSuccess.class);
 
     /**
@@ -46,7 +44,7 @@ public class VerificationSuccess extends SingleOutcomeNode {
         cbList.add(getTextOutputCallbackObject("Your verification is complete."));
         String[] choices = {"Next"};
         cbList.add(new ConfirmationCallback(0, choices, 0));
-        cbList.add(new ScriptTextOutputCallback(verificationSuccessScript.getVerificationSuccessScript()));
+        cbList.add(new ScriptTextOutputCallback(VerificationSuccessScript.getVerificationSuccessScript()));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 

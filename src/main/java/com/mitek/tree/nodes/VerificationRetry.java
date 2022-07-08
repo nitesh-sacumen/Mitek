@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.util.VerificationRetryScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
@@ -31,7 +30,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = VerificationRetry.OutcomeProvider.class, configClass = VerificationRetry.Config.class)
 public class VerificationRetry implements Node {
-    VerificationRetryScript verificationRetryScript = new VerificationRetryScript();
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationRetry";
     private static final Logger logger = LoggerFactory.getLogger(VerificationRetry.class);
 
@@ -58,7 +56,7 @@ public class VerificationRetry implements Node {
         cbList.add(getTextOutputCallbackObject("Use dark background."));
         String[] choices = {"Retry"};
         cbList.add(new ConfirmationCallback(0, choices, 0));
-        cbList.add(new ScriptTextOutputCallback(verificationRetryScript.getVerificationRetryScript()));
+        cbList.add(new ScriptTextOutputCallback(VerificationRetryScript.getVerificationRetryScript()));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 
@@ -72,13 +70,12 @@ public class VerificationRetry implements Node {
         JsonValue sharedState = context.sharedState;
         if (sharedState.get(Constants.RETRY_COUNT).isNull()) {
             sharedState.put(Constants.RETRY_COUNT, 0);
-        } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == Constants.RETRY_COUNT_VALUE) {
+        } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == sharedState.get(Constants.MAX_RETRY_COUNT).asInteger()) {
             return goTo(VerificationRetryOutcome.Reject).replaceSharedState(sharedState).build();
         }
         if ((context.hasCallbacks())) {
             Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
             retryCount++;
-            System.out.println("retry"+retryCount);
             sharedState.put(Constants.RETRY_COUNT, retryCount);
             sharedState.put(Constants.RETAKE_COUNT, 0);
             return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();

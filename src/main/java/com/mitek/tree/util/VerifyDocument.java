@@ -1,7 +1,6 @@
 package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -41,7 +40,6 @@ public class VerifyDocument {
             JSONObject parentObj = new JSONObject();
             JSONObject obj = new JSONObject();
             obj.put("type", "IdDocument");
-
             if (backImageCode != null) {
                 JSONObject backImageCodeObject = new JSONObject();
                 JSONObject encodedDataObject = new JSONObject();
@@ -69,8 +67,6 @@ public class VerifyDocument {
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", "Bearer " + accessToken);
             StringEntity stringEntity = new StringEntity(parentObj.toString());
-            System.out.println("payload is:");
-            System.out.println(parentObj.toString(4));
             httpPost.setEntity(stringEntity);
             CloseableHttpResponse response = httpclient.execute(httpPost);
             Integer responseCode = response.getStatusLine().getStatusCode();
@@ -78,10 +74,10 @@ public class VerifyDocument {
             HttpEntity entityResponse = response.getEntity();
             String result = EntityUtils.toString(entityResponse);
             JSONObject jsonResponse = new JSONObject(result);
-            System.out.println(jsonResponse.toString(4));
             JSONObject findings;
             String referenceId;
-            for (Integer i = 1; i <= 30; i++) {
+            Integer timeoutValue = sharedState.get(Constants.TIMEOUT_VALUE).asInteger();
+            for (Integer i = 1; i <= timeoutValue; i++) {
                 if (jsonResponse.has("dossierMetadata")) {
                     JSONObject dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
                     referenceId = dossierMetadataObj.get("dossierId").toString();
@@ -98,29 +94,29 @@ public class VerifyDocument {
                                 evidenceObject = evidenceList.getJSONObject(j);
                                 if (evidenceObject.has("images")) {
                                     imagesList = evidenceObject.getJSONArray("images");
-                                    imageObject = imagesList.getJSONObject(j);
-                                    processingStatus = imageObject.getString("processingStatus");
-                                    logger.debug("processing status is::");
-                                    logger.debug(processingStatus);
-                                    System.out.println("processing status is::");
-                                    System.out.println(processingStatus);
-                                    if(processingStatus!=null)
-                                    {
-                                        if (processingStatus.equalsIgnoreCase("Successful")) {
-                                            continue;
-                                        } else if (processingStatus.equalsIgnoreCase("Failed")) {
-                                            flag = true;//case of failed processing
-                                            break;
+                                    for (Integer k = 0; k < imagesList.length(); k++) {
+                                        imageObject = imagesList.getJSONObject(k);
+                                        processingStatus = imageObject.getString("processingStatus");
+                                        if (processingStatus != null) {
+                                            if (processingStatus.equalsIgnoreCase("Successful")) {
+                                                continue;
+                                            } else if (processingStatus.equalsIgnoreCase("Failed")) {
+                                                flag = true;//case of failed image processing
+                                                break;
+                                            }
                                         }
                                     }
+                                }
+                                if (flag) {
+                                    break;
                                 }
                             }
                             if (flag) {
                                 sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
-                                System.out.println("image processing failed");
+                                logger.debug("one or more image processing failed");
+                                System.out.println("one or more image processing failed");
                                 return;
                             } else {
-                                System.out.println("entering verification findings block");
                                 if (jsonResponse.has("findings")) {
                                     findings = (JSONObject) jsonResponse.get("findings");
                                     Boolean isAuthenticated = (Boolean) findings.get("authenticated");
@@ -129,8 +125,6 @@ public class VerifyDocument {
                                     } else {
                                         sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
                                     }
-                                    logger.debug("authentication status is:: " + isAuthenticated);
-                                    System.out.println("authentication status is:: " + isAuthenticated);
                                     break;
                                 }
                             }
@@ -143,8 +137,8 @@ public class VerifyDocument {
                 //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
                 // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
                 else if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408 || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503 || responseCode == 504) {//system error/ retry scenario
-                    logger.debug("authentication status is:: Retry");
-                    System.out.println("authentication status is:: Retry");
+                    logger.debug("error response code is:: " + responseCode);
+                    System.out.println("error response code is:: " + responseCode);
                     sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
                     break;
                 }

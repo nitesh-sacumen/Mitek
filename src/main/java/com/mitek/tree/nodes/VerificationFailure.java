@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.util.VerificationFailureScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationFailure.Config.class)
 public class VerificationFailure extends SingleOutcomeNode {
-    VerificationFailureScript verificationFailureScript = new VerificationFailureScript();
     private static final Logger logger = LoggerFactory.getLogger(VerificationFailure.class);
 
     /**
@@ -53,7 +51,7 @@ public class VerificationFailure extends SingleOutcomeNode {
         cbList.add(getTextOutputCallbackObject("(BDO-123-4567)"));
         String[] choices = {"Call Support"};
         cbList.add(new ConfirmationCallback(0, choices, 0));
-        cbList.add(new ScriptTextOutputCallback(verificationFailureScript.getVerificationFailureScript()));
+        cbList.add(new ScriptTextOutputCallback(VerificationFailureScript.getVerificationFailureScript()));
         return send(ImmutableList.copyOf(cbList)).build();
     }
 

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.util.ConsentScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
 import org.slf4j.Logger;
@@ -47,8 +46,7 @@ public class Consent extends SingleOutcomeNode {
      */
     private Action collectRegField(String[] consentLines) {
         List<Callback> cbList = new ArrayList<>();
-        ConsentScript consentScript = new ConsentScript();
-        ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(consentScript.getConsentScript());
+        ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(ConsentScript.getConsentScript());
         cbList.add(scriptTextOutputCallback);
         TextOutputCallback textOutputCallback;
         for (String consentLine : consentLines) {

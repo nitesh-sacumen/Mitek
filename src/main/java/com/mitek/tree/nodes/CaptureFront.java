@@ -29,7 +29,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureFront.Config.class)
 public class CaptureFront extends SingleOutcomeNode {
-    CaptureFrontScript captureFrontScript = new CaptureFrontScript();
 
     private static final Logger logger = LoggerFactory.getLogger(CaptureFront.class);
 
@@ -64,7 +63,7 @@ public class CaptureFront extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(captureFrontScript.removeElements(isVerificationRefresh)));
+            cbList.add(new ScriptTextOutputCallback(CaptureFrontScript.getScript(isVerificationRefresh)));
             cbList.add(getTextOutputCallbackObject("Capture Front of Document"));
             cbList.add(getTextOutputCallbackObject(" Use dark background"));
             cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));
@@ -83,7 +82,7 @@ public class CaptureFront extends SingleOutcomeNode {
     private Action buildCallbacks(String url, String identityChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image front capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(captureFrontScript.getCaptureFrontScript(url, identityChoice)));
+            add(new ScriptTextOutputCallback(CaptureFrontScript.getCaptureFrontScript(url, identityChoice)));
             add(new HiddenValueCallback("captureFrontResponse"));
         }}).build();
 

@@ -2,7 +2,6 @@ package com.mitek.tree.nodes;
 
 import com.google.inject.assistedinject.Assisted;
 import com.mitek.tree.config.Constants;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.annotations.sm.Attribute;
 import org.forgerock.openam.auth.node.api.*;
@@ -40,7 +39,14 @@ public class MitekConfiguration extends SingleOutcomeNode {
         @Attribute(order = 500, requiredValue = true)
         String grantType();
 
+        @Attribute(order = 600, requiredValue = true)
+        Integer retakeCount();
 
+        @Attribute(order = 700, requiredValue = true)
+        Integer retryCount();
+
+        @Attribute(order = 800, requiredValue = true)
+        Integer timeoutValue();
     }
 
     /**
@@ -58,8 +64,10 @@ public class MitekConfiguration extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        if (config.clientId() == null || config.clientSecret() == null || config.scope() == null || config.grantType() == null) {
-            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType to proceed");
+        if (config.clientId() == null || config.clientSecret() == null ||
+                config.scope() == null || config.grantType() == null
+                || config.retakeCount() == null || config.retryCount() == null || config.timeoutValue() == null) {
+            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/retakeCount/retryCount/timeoutValue to proceed");
             throw new NodeProcessException("Invalid credentials!!");
         }
         sharedState.put(Constants.CLIENT_ID, config.clientId());
@@ -67,6 +75,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.SCOPE, config.scope());
         sharedState.put(Constants.GRANT_TYPE, config.grantType());
         sharedState.put(Constants.CONSENT_DATA, config.consentData());
+        sharedState.put(Constants.MAX_RETAKE_COUNT, config.retakeCount());
+        sharedState.put(Constants.MAX_RETRY_COUNT, config.retryCount());
+        sharedState.put(Constants.TIMEOUT_VALUE, config.timeoutValue());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 

@@ -29,7 +29,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Passport.Config.class)
 public class Passport extends SingleOutcomeNode {
-    PassportScript passportScript = new PassportScript();
 
     private static final Logger logger = LoggerFactory.getLogger(Passport.class);
 
@@ -64,7 +63,7 @@ public class Passport extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(passportScript.removeElements(isVerificationRefresh)));
+            cbList.add(new ScriptTextOutputCallback(PassportScript.getScript(isVerificationRefresh)));
             cbList.add(getTextOutputCallbackObject("Capture Passport"));
             cbList.add(getTextOutputCallbackObject("* Use dark background"));
             cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));
@@ -83,7 +82,7 @@ public class Passport extends SingleOutcomeNode {
     private Action buildCallbacks(String url, String verificationChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after passport image capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(passportScript.getPassportScript(url, verificationChoice)));
+            add(new ScriptTextOutputCallback(PassportScript.getPassportScript(url, verificationChoice)));
             add(new HiddenValueCallback("capturePassportResponse"));
         }}).build();
     }

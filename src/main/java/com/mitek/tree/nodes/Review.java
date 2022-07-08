@@ -7,7 +7,6 @@ import com.mitek.tree.util.ReviewScript;
 import com.mitek.tree.util.VerifyDocument;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.Node;
@@ -68,7 +67,6 @@ public class Review implements Node {
                 logger.debug("Retaking image.......");
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 retakeCount++;
-                System.out.println(retakeCount);
                 sharedState.put(Constants.RETAKE_COUNT, retakeCount);
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
@@ -76,7 +74,7 @@ public class Review implements Node {
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
-                String backImageCode =null;
+                String backImageCode = null;
                 if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
                     backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
                 }
@@ -89,17 +87,17 @@ public class Review implements Node {
                 return goTo(ReviewOutcome.Wait).replaceSharedState(sharedState).build();
             }
         }
-
-        return buildCallbacks(retakeCount);
+        Integer maxRetakeCount = sharedState.get(Constants.MAX_RETAKE_COUNT).asInteger();
+        return buildCallbacks(retakeCount, maxRetakeCount);
     }
 
     /**
      * @param retakeCount Number of retakes for image capture
      * @return Action, Which will redirect to next action
      */
-    private Action buildCallbacks(Integer retakeCount) {
+    private Action buildCallbacks(Integer retakeCount, Integer maxRetakeCount) {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(ReviewScript.getReviewScript(retakeCount)));
+            add(new ScriptTextOutputCallback(ReviewScript.getReviewScript(retakeCount, maxRetakeCount)));
             add(new HiddenValueCallback("isRetake"));
             add(new HiddenValueCallback("front"));
             add(new HiddenValueCallback("selfie"));

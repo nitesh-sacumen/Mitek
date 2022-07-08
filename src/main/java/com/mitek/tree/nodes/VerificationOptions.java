@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.util.VerificationOptionsScript;
 import com.sun.identity.authentication.callbacks.ScriptTextOutputCallback;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
 import org.forgerock.util.i18n.PreferredLocales;
@@ -30,7 +29,6 @@ import static org.forgerock.openam.auth.node.api.Action.send;
  */
 @Node.Metadata(outcomeProvider = VerificationOptions.VerificationOptionsOutcomeProvider.class, configClass = VerificationOptions.Config.class)
 public class VerificationOptions implements Node {
-    VerificationOptionsScript verificationOptionsScript = new VerificationOptionsScript();
 
     private static final Logger logger = LoggerFactory.getLogger(VerificationOptions.class);
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOptions";
@@ -71,9 +69,9 @@ public class VerificationOptions implements Node {
             logger.debug("*********************Verification Options node********************");
             JsonValue sharedState = context.sharedState;
             Boolean isVerificationOptionsRefresh;
-            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
+            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean()) {
                 isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
-                if (isVerificationOptionsRefresh == true) {
+                if (isVerificationOptionsRefresh) {
                     sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
                     return buildCallbacks();
                 }
@@ -141,7 +139,7 @@ public class VerificationOptions implements Node {
 
     private Action buildCallbacks() {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(verificationOptionsScript.getVerificationOptionsScript()));
+            add(new ScriptTextOutputCallback(VerificationOptionsScript.getVerificationOptionsScript()));
         }}).build();
 
     }
