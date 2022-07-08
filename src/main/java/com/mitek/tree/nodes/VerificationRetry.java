@@ -33,7 +33,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationRetry implements Node {
     VerificationRetryScript verificationRetryScript = new VerificationRetryScript();
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationRetry";
-    private Logger logger = LoggerFactory.getLogger(VerificationRetry.class);
+    private static final Logger logger = LoggerFactory.getLogger(VerificationRetry.class);
 
     /**
      * Configuration for the node.
@@ -78,6 +78,7 @@ public class VerificationRetry implements Node {
         if ((context.hasCallbacks())) {
             Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
             retryCount++;
+            System.out.println("retry"+retryCount);
             sharedState.put(Constants.RETRY_COUNT, retryCount);
             sharedState.put(Constants.RETAKE_COUNT, 0);
             return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  * This class will generate access token and put it in shared context.
  */
 public class AccessToken {
-    private static Logger logger = LoggerFactory.getLogger(AccessToken.class);
+    private static final Logger logger = LoggerFactory.getLogger(AccessToken.class);
 
     /**
      * @param context TreeContext object

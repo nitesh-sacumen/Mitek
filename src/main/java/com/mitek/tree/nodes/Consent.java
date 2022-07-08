@@ -27,7 +27,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Consent extends SingleOutcomeNode {
 
 
-    private Logger logger = LoggerFactory.getLogger(Consent.class);
+    private static final Logger logger = LoggerFactory.getLogger(Consent.class);
 
     /**
      * Configuration for the node.

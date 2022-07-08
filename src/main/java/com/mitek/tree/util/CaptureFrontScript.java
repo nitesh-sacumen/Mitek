@@ -7,7 +7,7 @@ import com.mitek.tree.config.Constants;
  * This class contains js script which will use to get front side image of document.
  */
 public class CaptureFrontScript {
-    public String getRemoveElements(Boolean isVerificationRefresh) {
+    public String removeElements(Boolean isVerificationRefresh) {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
                 "}\n" +

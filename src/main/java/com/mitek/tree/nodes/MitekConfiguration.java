@@ -17,7 +17,7 @@ import javax.inject.Inject;
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = MitekConfiguration.Config.class)
 public class MitekConfiguration extends SingleOutcomeNode {
-    private Logger logger = LoggerFactory.getLogger(MitekConfiguration.class);
+    private static final Logger logger = LoggerFactory.getLogger(MitekConfiguration.class);
     private final Config config;
 
     /**

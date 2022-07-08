@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.net.SocketTimeoutException;
 
 public class VerifyDocument {
-    private static Logger logger = LoggerFactory.getLogger(AuthClientUtils.class);
+    private static final Logger logger = LoggerFactory.getLogger(VerifyDocument.class);
 
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) {
         JsonValue sharedState = context.sharedState;
@@ -37,19 +37,21 @@ public class VerifyDocument {
             data.put("data", imageData[1]);
             JSONArray images = new JSONArray();
             images.put(data);
-            if (backImageCode != "") {
+            JSONArray evidence = new JSONArray();
+            JSONObject parentObj = new JSONObject();
+            JSONObject obj = new JSONObject();
+            obj.put("type", "IdDocument");
+
+            if (backImageCode != null) {
                 JSONObject backImageCodeObject = new JSONObject();
                 JSONObject encodedDataObject = new JSONObject();
                 encodedDataObject.put("PDF417", backImageCode);
                 backImageCodeObject.put("encodedData", encodedDataObject);
                 images.put(backImageCodeObject);
             }
-            JSONObject obj = new JSONObject();
-            obj.put("type", "IdDocument");
             obj.put("images", images);
-            JSONArray evidence = new JSONArray();
             evidence.put(obj);
-            JSONObject parentObj = new JSONObject();
+            JSONObject configuration = new JSONObject();
             if (selfieData.startsWith(Constants.BASE64_STARTS_WITH)) {
                 JSONObject selfieObject = new JSONObject();
                 selfieObject.put("type", "Biometric");
@@ -59,8 +61,6 @@ public class VerifyDocument {
                 evidence.put(selfieObject);
                 JSONObject verifications = new JSONObject();
                 verifications.put("faceComparison", true);
-                //verifications.put("faceLiveness", true);//confirm getting error face liveness not activated on this account
-                JSONObject configuration = new JSONObject();
                 configuration.put("verifications", verifications);
                 parentObj.put("configuration", configuration);
             }
@@ -69,6 +69,8 @@ public class VerifyDocument {
             httpPost.addHeader("Content-Type", "application/json");
             httpPost.addHeader("Authorization", "Bearer " + accessToken);
             StringEntity stringEntity = new StringEntity(parentObj.toString());
+            System.out.println("payload is:");
+            System.out.println(parentObj.toString(4));
             httpPost.setEntity(stringEntity);
             CloseableHttpResponse response = httpclient.execute(httpPost);
             Integer responseCode = response.getStatusLine().getStatusCode();
@@ -84,17 +86,58 @@ public class VerifyDocument {
                     JSONObject dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
                     referenceId = dossierMetadataObj.get("dossierId").toString();
                     sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
-                    if (jsonResponse.has("findings")) {
-                        findings = (JSONObject) jsonResponse.get("findings");
-                        Boolean isAuthenticated = (Boolean) findings.get("authenticated");
-                        if (isAuthenticated) {
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
-                        } else {
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
+                    if (jsonResponse.has("evidence")) {
+                        try {
+                            JSONArray evidenceList = jsonResponse.getJSONArray("evidence");
+                            JSONObject evidenceObject;
+                            JSONArray imagesList;
+                            JSONObject imageObject;
+                            String processingStatus;
+                            Boolean flag = false;
+                            for (Integer j = 0; j < evidenceList.length(); j++) {
+                                evidenceObject = evidenceList.getJSONObject(j);
+                                if (evidenceObject.has("images")) {
+                                    imagesList = evidenceObject.getJSONArray("images");
+                                    imageObject = imagesList.getJSONObject(j);
+                                    processingStatus = imageObject.getString("processingStatus");
+                                    logger.debug("processing status is::");
+                                    logger.debug(processingStatus);
+                                    System.out.println("processing status is::");
+                                    System.out.println(processingStatus);
+                                    if(processingStatus!=null)
+                                    {
+                                        if (processingStatus.equalsIgnoreCase("Successful")) {
+                                            continue;
+                                        } else if (processingStatus.equalsIgnoreCase("Failed")) {
+                                            flag = true;//case of failed processing
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            if (flag) {
+                                sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
+                                System.out.println("image processing failed");
+                                return;
+                            } else {
+                                System.out.println("entering verification findings block");
+                                if (jsonResponse.has("findings")) {
+                                    findings = (JSONObject) jsonResponse.get("findings");
+                                    Boolean isAuthenticated = (Boolean) findings.get("authenticated");
+                                    if (isAuthenticated) {
+                                        sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
+                                    } else {
+                                        sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
+                                    }
+                                    logger.debug("authentication status is:: " + isAuthenticated);
+                                    System.out.println("authentication status is:: " + isAuthenticated);
+                                    break;
+                                }
+                            }
+                        } catch (Exception e) {
+                            logger.error(e.getMessage());
+                            e.printStackTrace();
                         }
-                        logger.debug("authentication status is:: " + isAuthenticated);
-                        System.out.println("authentication status is:: " + isAuthenticated);
-                        break;
                     }
                 }
                 //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
@@ -107,10 +150,7 @@ public class VerifyDocument {
                 }
                 Thread.sleep(1000);
             }
-        } catch (ConnectTimeoutException e) {
-            logger.error(e.getMessage());
-            e.printStackTrace();
-        } catch (SocketTimeoutException e) {
+        } catch (ConnectTimeoutException | SocketTimeoutException e) {
             logger.error(e.getMessage());
             e.printStackTrace();
         } catch (Exception e) {
@@ -129,7 +169,7 @@ public class VerifyDocument {
 
     public CloseableHttpClient buildDefaultClient() {
         logger.debug("requesting http client connection client open");
-        Integer timeout = 30;
+        Integer timeout = Constants.REQUEST_TIMEOUT;
         RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
         HttpClientBuilder clientBuilder = HttpClientBuilder.create();
         return clientBuilder.setDefaultRequestConfig(config).build();

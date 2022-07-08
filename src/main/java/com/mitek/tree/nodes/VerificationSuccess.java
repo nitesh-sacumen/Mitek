@@ -24,7 +24,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationSuccess extends SingleOutcomeNode {
 
     VerificationSuccessScript verificationSuccessScript = new VerificationSuccessScript();
-    private Logger logger = LoggerFactory.getLogger(VerificationSuccess.class);
+    private static final Logger logger = LoggerFactory.getLogger(VerificationSuccess.class);
 
     /**
      * Configuration for the node.

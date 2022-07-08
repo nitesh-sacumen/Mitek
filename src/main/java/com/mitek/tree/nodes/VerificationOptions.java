@@ -32,7 +32,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class VerificationOptions implements Node {
     VerificationOptionsScript verificationOptionsScript = new VerificationOptionsScript();
 
-    private static Logger logger = LoggerFactory.getLogger(VerificationOptions.class);
+    private static final Logger logger = LoggerFactory.getLogger(VerificationOptions.class);
     private static final String BUNDLE = "com/mitek/tree/nodes/VerificationOptions";
 
     /**
@@ -79,16 +79,26 @@ public class VerificationOptions implements Node {
                 }
             }
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
+                String existingVerificationChoice = null;
+                if (sharedState.get(Constants.VERIFICATION_CHOICE).isNotNull()) {
+                    existingVerificationChoice = sharedState.get(Constants.VERIFICATION_CHOICE).asString();
+                }
                 Integer selectedIndex = Arrays.stream(context.getCallback(ChoiceCallback.class).get().getSelectedIndexes()).findFirst().getAsInt();
                 String selectedValue;
                 switch (selectedIndex) {
                     case 0:
                         selectedValue = Constants.PASSPORT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
+                        if (existingVerificationChoice != null) {
+                            f1(existingVerificationChoice, selectedValue, context);
+                        }
                         return goTo(VerificationOptionsOutcome.PASSPORT).replaceSharedState(sharedState).build();
                     case 1:
                         selectedValue = Constants.DOCUMENT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
+                        if (existingVerificationChoice != null) {
+                            f1(existingVerificationChoice, selectedValue, context);
+                        }
                         return goTo(VerificationOptionsOutcome.IDDL).replaceSharedState(sharedState).build();
                     default:
                         logger.error("No option selected/Invalid option. Please try again.");
@@ -100,6 +110,14 @@ public class VerificationOptions implements Node {
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new NodeProcessException("Exception is: " + e);
+        }
+    }
+
+    void f1(String existingVerificationChoice, String selectedValue, TreeContext context) {
+        if (!existingVerificationChoice.equalsIgnoreCase(selectedValue)) {
+            JsonValue sharedState = context.sharedState;
+            sharedState.put(Constants.RETAKE_COUNT, 0);
+            sharedState.put(Constants.RETRY_COUNT, 0);
         }
     }
 

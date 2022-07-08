@@ -31,7 +31,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class CaptureFront extends SingleOutcomeNode {
     CaptureFrontScript captureFrontScript = new CaptureFrontScript();
 
-    private static Logger logger = LoggerFactory.getLogger(CaptureFront.class);
+    private static final Logger logger = LoggerFactory.getLogger(CaptureFront.class);
 
     /**
      * Configuration for the node.
@@ -64,7 +64,7 @@ public class CaptureFront extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(captureFrontScript.getRemoveElements(isVerificationRefresh)));
+            cbList.add(new ScriptTextOutputCallback(captureFrontScript.removeElements(isVerificationRefresh)));
             cbList.add(getTextOutputCallbackObject("Capture Front of Document"));
             cbList.add(getTextOutputCallbackObject(" Use dark background"));
             cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));

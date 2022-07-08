@@ -5,7 +5,7 @@ package com.mitek.tree.util;
  * This class contains js script which will use to get back side image of document.
  */
 public class CaptureBackScript {
-    public String getremoveElements() {
+    public String removeElements() {
         return "if (document.contains(document.getElementById('parentDiv'))) {\n" +
                 "document.getElementById('parentDiv').remove();\n" +
                 "}\n" +

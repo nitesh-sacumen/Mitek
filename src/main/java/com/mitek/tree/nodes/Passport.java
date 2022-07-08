@@ -31,7 +31,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Passport extends SingleOutcomeNode {
     PassportScript passportScript = new PassportScript();
 
-    private static Logger logger = LoggerFactory.getLogger(Passport.class);
+    private static final Logger logger = LoggerFactory.getLogger(Passport.class);
 
     /**
      * Configuration for the node.
@@ -64,7 +64,7 @@ public class Passport extends SingleOutcomeNode {
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(passportScript.getRemoveElements(isVerificationRefresh)));
+            cbList.add(new ScriptTextOutputCallback(passportScript.removeElements(isVerificationRefresh)));
             cbList.add(getTextOutputCallbackObject("Capture Passport"));
             cbList.add(getTextOutputCallbackObject("* Use dark background"));
             cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));

@@ -27,7 +27,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Selfie extends SingleOutcomeNode {
     SelfieScript selfieScript = new SelfieScript();
 
-    private static Logger logger = LoggerFactory.getLogger(Selfie.class);
+    private static final Logger logger = LoggerFactory.getLogger(Selfie.class);
 
     /**
      * Configuration for the node.

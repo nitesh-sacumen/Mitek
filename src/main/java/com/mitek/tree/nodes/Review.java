@@ -35,7 +35,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 public class Review implements Node {
 
     private static final String BUNDLE = "com/mitek/tree/nodes/Review";
-    private static Logger logger = LoggerFactory.getLogger(Review.class);
+    private static final Logger logger = LoggerFactory.getLogger(Review.class);
 
     /**
      * Configuration for the node.
@@ -68,6 +68,7 @@ public class Review implements Node {
                 logger.debug("Retaking image.......");
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 retakeCount++;
+                System.out.println(retakeCount);
                 sharedState.put(Constants.RETAKE_COUNT, retakeCount);
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
@@ -75,7 +76,7 @@ public class Review implements Node {
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
-                String backImageCode = "";
+                String backImageCode =null;
                 if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
                     backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
                 }
