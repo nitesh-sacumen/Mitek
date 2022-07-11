@@ -70,6 +70,7 @@ public class Review implements Node {
                 sharedState.put(Constants.RETAKE_COUNT, retakeCount);
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
+                sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 logger.debug("Submitting image.....");
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
