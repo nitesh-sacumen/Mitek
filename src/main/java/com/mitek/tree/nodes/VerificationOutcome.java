@@ -2,7 +2,6 @@ package com.mitek.tree.nodes;
 
 import com.google.common.collect.ImmutableList;
 import com.mitek.tree.config.Constants;
-import com.sun.identity.authentication.client.AuthClientUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.*;
 import org.forgerock.util.i18n.PreferredLocales;

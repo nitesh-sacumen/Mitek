@@ -114,7 +114,6 @@ public class VerifyDocument {
                             if (flag) {
                                 sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
                                 logger.debug("one or more image processing failed");
-                                System.out.println("one or more image processing failed");
                                 return;
                             } else {
                                 if (jsonResponse.has("findings")) {

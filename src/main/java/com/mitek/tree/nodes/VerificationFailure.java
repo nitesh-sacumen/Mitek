@@ -37,7 +37,7 @@ public class VerificationFailure extends SingleOutcomeNode {
      * @return Action, Which will redirect to next action.
      * Display text to user and collect user choice for customer support or call support.
      */
-    private Action collectRegField(TreeContext context) {
+    private Action collectRegField(TreeContext context) throws NodeProcessException {
         List<Callback> cbList = new ArrayList<>();
         cbList.add(getTextOutputCallbackObject("Verification Pending"));
         cbList.add(getTextOutputCallbackObject("More details are needed to complete your verification"));

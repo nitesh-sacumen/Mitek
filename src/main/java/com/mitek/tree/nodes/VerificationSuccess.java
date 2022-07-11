@@ -33,11 +33,10 @@ public class VerificationSuccess extends SingleOutcomeNode {
 
 
     /**
-     * @param context
      * @return Action, Which will redirect to next action.
      * Display text to user and collect user choice for success.
      */
-    private Action collectRegField(TreeContext context) {
+    private Action collectRegField() {
         List<Callback> cbList = new ArrayList<>();
         cbList.add(getTextOutputCallbackObject("Verification Complete"));
         cbList.add(getTextOutputCallbackObject("Thank you!"));
@@ -58,7 +57,7 @@ public class VerificationSuccess extends SingleOutcomeNode {
         if ((context.hasCallbacks())) {
             return goToNext().build();
         } else {
-            return collectRegField(context);
+            return collectRegField();
         }
     }
 

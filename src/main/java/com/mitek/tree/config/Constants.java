@@ -38,7 +38,6 @@ public final class Constants {
     public static final String PASSPORT_VERIFICATION_OPTION = "PASSPORT";
     public static final String SELFIE_VERIFICATION_OPTION = "SELFIE";
     public static final String JS_URL = "/mitek/p1.js";
-//    public static final int RETRY_COUNT_VALUE = 3;
     public static final int REQUEST_TIMEOUT = 30;
     public static final String MAX_RETAKE_COUNT = "max_retake_count";
     public static final String MAX_RETRY_COUNT = "max_retry_count";
