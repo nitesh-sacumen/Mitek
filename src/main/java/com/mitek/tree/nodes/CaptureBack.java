@@ -22,7 +22,7 @@ import static org.forgerock.openam.auth.node.api.Action.send;
 
 
 /**
- * @author Saucmen(www.sacumen.com) Capture Back node with
+ * @author Sacumen(www.sacumen.com) Capture Back node with
  * single outcome. This node will capture back image of ID/DL document.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureBack.Config.class)

@@ -20,7 +20,7 @@ import java.util.List;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Capture Front node with
+ * @author Sacumen(www.sacumen.com) Capture Front node with
  * single outcome. This node will capture front image of ID/DL document.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = CaptureFront.Config.class)

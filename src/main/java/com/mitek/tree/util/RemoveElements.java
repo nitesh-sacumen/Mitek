@@ -1,5 +1,9 @@
 package com.mitek.tree.util;
 
+/**
+ * @author Sacumen(www.sacumen.com)
+ * This class contains js script which will remove elements from the document.
+ */
 public class RemoveElements {
 
     public static String removeElements() {

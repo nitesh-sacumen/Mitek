@@ -20,7 +20,7 @@ import java.util.List;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Passport node with
+ * @author Sacumen(www.sacumen.com) Passport node with
  * single outcome. This node will capture image of passport document.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Passport.Config.class)

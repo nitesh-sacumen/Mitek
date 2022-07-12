@@ -19,7 +19,7 @@ import java.util.List;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Consent text node with
+ * @author Sacumen(www.sacumen.com) Consent text node with
  * single outcome. This node will present consent to user and this will be same for all the flows.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Consent.Config.class)

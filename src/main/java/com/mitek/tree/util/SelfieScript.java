@@ -3,8 +3,8 @@ package com.mitek.tree.util;
 import com.mitek.tree.config.Constants;
 
 /**
- * @author Saucmen(www.sacumen.com)
- * This class contains js script which will use to get image of selfie..
+ * @author Sacumen(www.sacumen.com)
+ * This class contains js script which will use to get image of selfie.
  */
 public class SelfieScript {
 

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 
 /**
- * @author Saucmen(www.sacumen.com) Mitek configuration node with
+ * @author Sacumen(www.sacumen.com) Mitek configuration node with
  * single outcome. This node will get mitek configuration and put it thorugh shared context.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = MitekConfiguration.Config.class)

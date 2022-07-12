@@ -22,7 +22,7 @@ import java.util.ResourceBundle;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Verification option node with
+ * @author Sacumen(www.sacumen.com) Verification option node with
  * two outcome DL/ID and Passport. This node will get document type from user.
  * DL/ID - This will redirect to DL/ID flow.
  * Passport - This will redirect to passport flow.

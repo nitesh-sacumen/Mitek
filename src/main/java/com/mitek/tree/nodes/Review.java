@@ -24,10 +24,10 @@ import java.util.ResourceBundle;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Review node with
+ * @author Sacumen(www.sacumen.com) Review node with
  * two outcome. This node will verify captured images for passport, selfie and DL/ID.
  * This node contains two outcome - Retake and Wait.
- * Retke will agian force user to retake image
+ * Retake will again force user to retake image
  * Wait will connect to next node after verification result.
  */
 @Node.Metadata(outcomeProvider = Review.ReviewOutcomeProvider.class, configClass = Review.Config.class)

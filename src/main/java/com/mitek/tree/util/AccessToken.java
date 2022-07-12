@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * @author Saucmen(www.sacumen.com)
+ * @author Sacumen(www.sacumen.com)
  * This class will generate access token and put it in shared context.
  */
 public class AccessToken {
