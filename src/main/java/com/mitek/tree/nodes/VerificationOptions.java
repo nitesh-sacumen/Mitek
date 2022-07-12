@@ -88,14 +88,14 @@ public class VerificationOptions implements Node {
                         selectedValue = Constants.PASSPORT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                         if (existingVerificationChoice != null) {
-                            f1(existingVerificationChoice, selectedValue, context);
+                            setRetakeAndRetryCount(existingVerificationChoice, selectedValue, context);
                         }
                         return goTo(VerificationOptionsOutcome.PASSPORT).replaceSharedState(sharedState).build();
                     case 1:
                         selectedValue = Constants.DOCUMENT_VERIFICATION_OPTION;
                         sharedState.put(Constants.VERIFICATION_CHOICE, selectedValue);
                         if (existingVerificationChoice != null) {
-                            f1(existingVerificationChoice, selectedValue, context);
+                            setRetakeAndRetryCount(existingVerificationChoice, selectedValue, context);
                         }
                         return goTo(VerificationOptionsOutcome.IDDL).replaceSharedState(sharedState).build();
                     default:
@@ -107,11 +107,11 @@ public class VerificationOptions implements Node {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new NodeProcessException("Exception is: " + e);
+            throw new NodeProcessException("Exception is: " + e.getLocalizedMessage());
         }
     }
 
-    void f1(String existingVerificationChoice, String selectedValue, TreeContext context) {
+    void setRetakeAndRetryCount(String existingVerificationChoice, String selectedValue, TreeContext context) {
         if (!existingVerificationChoice.equalsIgnoreCase(selectedValue)) {
             JsonValue sharedState = context.sharedState;
             sharedState.put(Constants.RETAKE_COUNT, 0);

@@ -35,16 +35,19 @@ public class Review implements Node {
 
     private static final String BUNDLE = "com/mitek/tree/nodes/Review";
     private static final Logger logger = LoggerFactory.getLogger(Review.class);
+    private AccessToken accessToken;
+    private VerifyDocument verifyDocument;
 
     /**
      * Configuration for the node.
      */
     public interface Config {
-
     }
 
     @Inject
-    public Review() {
+    public Review(AccessToken accessToken,VerifyDocument verifyDocument) {
+        this.accessToken = accessToken;
+        this.verifyDocument = verifyDocument;
     }
 
     /**
@@ -55,23 +58,26 @@ public class Review implements Node {
     public Action process(TreeContext context) throws NodeProcessException {
         logger.debug("*********************Review node********************");
         JsonValue sharedState = context.sharedState;
+
         Integer retakeCount;
         if (sharedState.get(Constants.RETAKE_COUNT).isNull()) {
             sharedState.put(Constants.RETAKE_COUNT, 0);
         }
         retakeCount = sharedState.get(Constants.RETAKE_COUNT).asInteger();
+
         if (!context.getCallback(HiddenValueCallback.class).isEmpty()) {
             String isRetake = context.getCallbacks(HiddenValueCallback.class).get(0).getValue();
-            sharedState.put("isRetake", isRetake);
+            sharedState.put(Constants.IS_RETAKE, isRetake);
+
             if (isRetake.equalsIgnoreCase("true")) {
-                logger.debug("Retaking image.......");
+                logger.info("Retaking image.......");
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
                 retakeCount++;
                 sharedState.put(Constants.RETAKE_COUNT, retakeCount);
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
+                logger.info("Submitting image.....");
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, true);
-                logger.debug("Submitting image.....");
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
@@ -79,11 +85,9 @@ public class Review implements Node {
                 if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
                     backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
                 }
-                AccessToken token = new AccessToken();
-                String accessToken = token.getAccessToken(context);
-                if (accessToken != null) {
-                    VerifyDocument verifyDocument = new VerifyDocument();
-                    verifyDocument.verify(accessToken, frontData, selfieData, passportData, backImageCode, context);
+                String accessTokenResult = accessToken.getAccessToken(context);
+                if (accessTokenResult != null) {
+                    verifyDocument.verify(accessTokenResult, frontData, selfieData, passportData, backImageCode, context);
                 }
                 return goTo(ReviewOutcome.Wait).replaceSharedState(sharedState).build();
             }

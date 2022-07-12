@@ -30,6 +30,7 @@ public final class Constants {
     public static final String BASE64_STARTS_WITH = "data";
     public static final String VERIFICATION_REFERENCE_ID = "verification_reference_id";
     public static final String RETAKE_COUNT = "retake_count";
+    public static final String IS_RETAKE = "isRetake";
     public static final String RETRY_COUNT = "retry_count";
     public static final String PDF_417_CODE = "pdf_417_code";
 
