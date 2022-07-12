@@ -16,7 +16,7 @@ import java.util.List;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Verification Success node with
+ * @author Sacumen(www.sacumen.com) Verification Success node with
  * single outcome. This node will render Success message to user.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = VerificationSuccess.Config.class)

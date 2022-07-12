@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 /**
- * @author Saucmen(www.sacumen.com) Verification Outcome node with
+ * @author Sacumen(www.sacumen.com) Verification Outcome node with
  * 3 outcome. This node will navigate flow based upon verification result.
  */
 @Node.Metadata(outcomeProvider = VerificationOutcome.MitekOutcomeProvider.class, configClass = VerificationOutcome.Config.class)

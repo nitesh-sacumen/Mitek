@@ -3,7 +3,7 @@ package com.mitek.tree.util;
 import com.mitek.tree.config.Constants;
 
 /**
- * @author Saucmen(www.sacumen.com)
+ * @author Sacumen(www.sacumen.com)
  * This class contains js script which will use to get image of passport.
  */
 public class PassportScript {

@@ -1,7 +1,7 @@
 package com.mitek.tree.util;
 
 /**
- * @author Saucmen(www.sacumen.com)
+ * @author Sacumen(www.sacumen.com)
  * This class contains js script which will use to get image of front, back, selfie and passport.
  */
 public class ReviewScript {

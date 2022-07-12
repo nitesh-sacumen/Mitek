@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Selfie node with
+ * @author Sacumen(www.sacumen.com) Selfie node with
  * single outcome. This node will capture selfie image.
  */
 @Node.Metadata(outcomeProvider = SingleOutcomeNode.OutcomeProvider.class, configClass = Selfie.Config.class)

@@ -1,3 +1,9 @@
+/**
+ * @author Sacumen(www.sacumen.com)
+ * This class will send the captured images data to the mitek api for verification
+ * and will check for whether the verification was successful/failed,timeout
+ */
+
 package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;

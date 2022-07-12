@@ -23,7 +23,7 @@ import java.util.ResourceBundle;
 import static org.forgerock.openam.auth.node.api.Action.send;
 
 /**
- * @author Saucmen(www.sacumen.com) Verification Retry node with
+ * @author Sacumen(www.sacumen.com) Verification Retry node with
  * two outcome - Retry and Retake. This node will render retry message to user.
  * Retry - Retry will force user to retry entire flow.
  * Retake - Retake will force user to retake image again.
