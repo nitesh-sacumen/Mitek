@@ -2,12 +2,10 @@ package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
 import org.apache.http.HttpEntity;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.NodeProcessException;
@@ -38,8 +36,9 @@ public class AccessToken {
     public String getAccessToken(TreeContext context) throws NodeProcessException {
         String accessToken = null;
         JsonValue sharedState = context.sharedState;
-        try (CloseableHttpClient httpclient = getHttpClient()) {
-            HttpPost httpPost = createPostRequest(sharedState.get(Constants.API_URL).asString()+Constants.API_TOKEN_URL);
+        HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
+        try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient()) {
+            HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.API_TOKEN_URL);
             addParamsToPostRequest(context, httpPost);
 
             CloseableHttpResponse response = httpclient.execute(httpPost);
@@ -47,8 +46,8 @@ public class AccessToken {
             Integer responseCode = response.getStatusLine().getStatusCode();
 
             if (responseCode != 200) {
-                logger.error("Error while retrieving access token: "+"response code : "+responseCode);
-                throw new NodeProcessException("responseCode : "+responseCode);
+                logger.error("Error while retrieving access token: " + "response code : " + responseCode);
+                throw new NodeProcessException("responseCode : " + responseCode);
             }
 
             HttpEntity entityResponse = response.getEntity();
@@ -59,41 +58,9 @@ public class AccessToken {
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new NodeProcessException("Caught exception while generating access token, "+e.getLocalizedMessage());
+            throw new NodeProcessException("Caught exception while generating access token, " + e.getLocalizedMessage());
         }
         return accessToken;
-    }
-
-    /**
-     * Building http client with default configuration
-     *
-     * @return Http client
-     */
-    private CloseableHttpClient getHttpClient() {
-        return buildDefaultClient();
-    }
-
-    /**
-     * Building http client with explicit configuration
-     *
-     * @return
-     */
-    private CloseableHttpClient buildDefaultClient() {
-        logger.debug("requesting http client connection client open");
-        Integer timeout = Constants.REQUEST_TIMEOUT;
-        RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();
-        HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-        return clientBuilder.setDefaultRequestConfig(config).build();
-    }
-
-    /**
-     * Initializing http post object
-     *
-     * @param url URL for post request
-     * @return Http post object
-     */
-    private HttpPost createPostRequest(String url) {
-        return new HttpPost(url);
     }
 
     /**

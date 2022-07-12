@@ -84,7 +84,6 @@ public class MitekNodePlugin extends AbstractNodeAmPlugin {
                         CaptureFront.class,
                         CaptureBack.class,
                         Passport.class
-
                 ));
     }
 
