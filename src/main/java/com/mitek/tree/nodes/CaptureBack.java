@@ -54,7 +54,8 @@ public class CaptureBack extends SingleOutcomeNode {
             sharedState.put(Constants.PDF_417_CODE, backImageCode);
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
-            return buildCallbacks(Constants.JS_URL, Constants.BACK_VERIFICATION_OPTION);
+            String scriptFilePath = sharedState.get(Constants.JS_URL).asString();
+            return buildCallbacks(scriptFilePath, Constants.BACK_VERIFICATION_OPTION);
         } else {
             List<Callback> cbList = new ArrayList<>();
             cbList.add(new ScriptTextOutputCallback(RemoveElements.removeElements()));

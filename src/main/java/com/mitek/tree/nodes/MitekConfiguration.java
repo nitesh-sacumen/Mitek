@@ -50,6 +50,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
 
         @Attribute(order = 900, requiredValue = true)
         String APIUrl();
+
+        @Attribute(order = 1000, requiredValue = true)
+        String scriptFilePath();
     }
 
     /**
@@ -69,8 +72,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
         JsonValue sharedState = context.sharedState;
         if (config.clientId() == null || config.clientSecret() == null ||
                 config.scope() == null || config.grantType() == null
-                || config.retakeCount() == null || config.retryCount() == null || config.timeoutValue() == null) {
-            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/retakeCount/retryCount/timeoutValue to proceed");
+                || config.retakeCount() == null || config.retryCount() == null || config.timeoutValue() == null
+                || config.APIUrl() == null || config.scriptFilePath() == null) {
+            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/retakeCount/retryCount/timeoutValue/APIUrl/scriptFilePath to proceed");
             throw new NodeProcessException("Invalid credentials!!");
         }
         sharedState.put(Constants.CLIENT_ID, config.clientId());
@@ -82,6 +86,7 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.MAX_RETRY_COUNT, config.retryCount());
         sharedState.put(Constants.TIMEOUT_VALUE, config.timeoutValue());
         sharedState.put(Constants.API_URL, config.APIUrl());
+        sharedState.put(Constants.JS_URL, config.scriptFilePath());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 

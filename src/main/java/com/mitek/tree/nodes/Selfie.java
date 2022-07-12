@@ -45,7 +45,8 @@ public class Selfie extends SingleOutcomeNode {
         if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         }
-        return buildCallbacks(Constants.JS_URL, Constants.SELFIE_VERIFICATION_OPTION);
+        String scriptFilePath = sharedState.get(Constants.JS_URL).asString();
+        return buildCallbacks(scriptFilePath, Constants.SELFIE_VERIFICATION_OPTION);
     }
 
     /**
