@@ -29,7 +29,7 @@ public class VerifyDocument {
 
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        JSONObject data, parentObj, obj, jsonResponse, findings;
+        JSONObject data, parentObj, obj, jsonResponse;
         JSONArray images, evidence;
         Integer responseCode;
         if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
@@ -73,64 +73,24 @@ public class VerifyDocument {
                 logger.error(e.getMessage());
                 throw new NodeProcessException("Exception is: " + e);
             }
-            String referenceId, processingStatus;
-            JSONObject dossierMetadataObj, evidenceObject, imageObject;
-            JSONArray evidenceList, imagesList;
-            Boolean flag, isAuthenticated;
+
+
             Integer timeoutValue = sharedState.get(Constants.TIMEOUT_VALUE).asInteger();
+            Boolean flag;
             for (Integer i = 1; i <= timeoutValue; i++) {
-                if (jsonResponse != null && jsonResponse.has("dossierMetadata")) {
-                    dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
-                    referenceId = dossierMetadataObj.get("dossierId").toString();
-                    sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
-                    if (jsonResponse.has("evidence")) {
-                        evidenceList = jsonResponse.getJSONArray("evidence");
-                        flag = false;
-                        for (Integer j = 0; j < evidenceList.length(); j++) {
-                            evidenceObject = evidenceList.getJSONObject(j);
-                            if (evidenceObject.has("images")) {
-                                imagesList = evidenceObject.getJSONArray("images");
-                                for (Integer k = 0; k < imagesList.length(); k++) {
-                                    imageObject = imagesList.getJSONObject(k);
-                                    processingStatus = imageObject.getString("processingStatus");
-                                    if (processingStatus != null) {
-                                        if (processingStatus.equalsIgnoreCase("Failed")) {
-                                            flag = true;//case of failed image processing
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (flag) {
-                                break;
-                            }
-                        }
-                        if (flag) {
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
-                            logger.debug("one or more image processing failed");
-                            return;
-                        } else {
-                            if (jsonResponse.has("findings")) {
-                                findings = (JSONObject) jsonResponse.get("findings");
-                                isAuthenticated = (Boolean) findings.get("authenticated");
-                                if (isAuthenticated) {
-                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
-                                } else {
-                                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
                 //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
                 // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
-                else if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408
+                if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408
                         || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503
-                        || responseCode == 504) {//system error/ retry scenario
+                        || responseCode == 504) {
                     logger.debug("error response code is:: " + responseCode);
                     sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
                     break;
+                } else {
+                    flag = VerifyApiResponse.checkResponse(jsonResponse, context);
+                    if (flag) {
+                        break;
+                    }
                 }
                 try {
                     Thread.sleep(1000);
