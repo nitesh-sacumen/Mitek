@@ -18,6 +18,7 @@ import javax.security.auth.callback.ConfirmationCallback;
 import javax.security.auth.callback.TextOutputCallback;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static org.forgerock.openam.auth.node.api.Action.send;
@@ -70,15 +71,15 @@ public class VerificationRetry implements Node {
         JsonValue sharedState = context.sharedState;
         if (sharedState.get(Constants.RETRY_COUNT).isNull()) {
             sharedState.put(Constants.RETRY_COUNT, 0);
-        } else if (sharedState.get(Constants.RETRY_COUNT).asInteger() == sharedState.get(Constants.MAX_RETRY_COUNT).asInteger()) {
-            return goTo(VerificationRetryOutcome.Reject).replaceSharedState(sharedState).build();
+        } else if (Objects.equals(sharedState.get(Constants.RETRY_COUNT).asInteger(), sharedState.get(Constants.MAX_RETRY_COUNT).asInteger())) {
+            return goTo(VerificationRetryOutcome.REJECT).replaceSharedState(sharedState).build();
         }
         if ((context.hasCallbacks())) {
             Integer retryCount = sharedState.get(Constants.RETRY_COUNT).asInteger();
             retryCount++;
             sharedState.put(Constants.RETRY_COUNT, retryCount);
             sharedState.put(Constants.RETAKE_COUNT, 0);
-            return goTo(VerificationRetryOutcome.Retry).replaceSharedState(sharedState).build();
+            return goTo(VerificationRetryOutcome.RETRY).replaceSharedState(sharedState).build();
         } else {
             return collectRegField(context);
         }
@@ -109,11 +110,11 @@ public class VerificationRetry implements Node {
         /**
          * selection of Retry.
          */
-        Retry,
+        RETRY,
         /**
          * selection for Reject.
          */
-        Reject
+        REJECT
     }
 
 
@@ -129,8 +130,8 @@ public class VerificationRetry implements Node {
         @Override
         public List<Outcome> getOutcomes(PreferredLocales locales, JsonValue nodeAttributes) {
             ResourceBundle bundle = locales.getBundleInPreferredLocale(VerificationRetry.BUNDLE, VerificationRetry.OutcomeProvider.class.getClassLoader());
-            return ImmutableList.of(new Outcome(VerificationRetryOutcome.Retry.name(), bundle.getString("retry")),
-                    new Outcome(VerificationRetryOutcome.Reject.name(), bundle.getString("reject")));
+            return ImmutableList.of(new Outcome(VerificationRetryOutcome.RETRY.name(), bundle.getString("retry")),
+                    new Outcome(VerificationRetryOutcome.REJECT.name(), bundle.getString("reject")));
         }
     }
 }
