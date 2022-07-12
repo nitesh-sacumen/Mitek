@@ -25,7 +25,7 @@ public class VerifyDocument {
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) {
         JsonValue sharedState = context.sharedState;
         try (CloseableHttpClient httpclient = getHttpClient()) {
-            HttpPost httpPost = createPostRequest(Constants.VERIFY_DOCUMENT_API_URL);
+            HttpPost httpPost = createPostRequest(sharedState.get(Constants.API_URL).asString()+Constants.VERIFY_DOCUMENT_API_URL);
             String[] imageData = null;
             JSONObject data = new JSONObject();
             if (frontData.startsWith(Constants.BASE64_STARTS_WITH)) {

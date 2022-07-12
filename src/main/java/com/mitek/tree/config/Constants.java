@@ -19,8 +19,8 @@ public final class Constants {
 
     public static final String VERIFICATION_CHOICE = "verification_choice";
 
-    public static final String API_TOKEN_URL = "https://api.sandbox.west-1.us.mitekcloud.com/connect/token";
-    public static final String VERIFY_DOCUMENT_API_URL = "https://api.sandbox.west-1.us.mitekcloud.com/api/verify/v2/dossier";
+    public static final String API_TOKEN_URL = "/connect/token";
+    public static final String VERIFY_DOCUMENT_API_URL = "/api/verify/v2/dossier";
     public static final String IS_VERIFICATION_REFRESH = "is_verification_refresh";
     public static final String VERIFICATION_RESULT = "verification_result";
 
@@ -42,4 +42,5 @@ public final class Constants {
     public static final String MAX_RETAKE_COUNT = "max_retake_count";
     public static final String MAX_RETRY_COUNT = "max_retry_count";
     public static final String TIMEOUT_VALUE = "timeout_value";
+    public static final String API_URL = "api_url";
 }

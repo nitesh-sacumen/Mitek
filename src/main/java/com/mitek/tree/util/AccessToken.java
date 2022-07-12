@@ -37,27 +37,29 @@ public class AccessToken {
      */
     public String getAccessToken(TreeContext context) throws NodeProcessException {
         String accessToken = null;
-
+        JsonValue sharedState = context.sharedState;
         try (CloseableHttpClient httpclient = getHttpClient()) {
-            HttpPost httpPost = createPostRequest(Constants.API_TOKEN_URL);
+            HttpPost httpPost = createPostRequest(sharedState.get(Constants.API_URL).asString()+Constants.API_TOKEN_URL);
             addParamsToPostRequest(context, httpPost);
 
             CloseableHttpResponse response = httpclient.execute(httpPost);
 
             Integer responseCode = response.getStatusLine().getStatusCode();
-            HttpEntity entityResponse = response.getEntity();
-            String result = EntityUtils.toString(entityResponse);
 
             if (responseCode != 200) {
-                throw new NodeProcessException("Not able to retrieve access token: " + result);
+                logger.error("Error while retrieving access token: "+"response code : "+responseCode);
+                throw new NodeProcessException("responseCode : "+responseCode);
             }
+
+            HttpEntity entityResponse = response.getEntity();
+            String result = EntityUtils.toString(entityResponse);
             JSONObject jsonResponse = new JSONObject(result);
             if (jsonResponse.has("access_token")) {
                 accessToken = jsonResponse.getString("access_token");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            throw new NodeProcessException("Caught exception while generating access token: " + e.getMessage());
+            throw new NodeProcessException("Caught exception while generating access token, "+e.getLocalizedMessage());
         }
         return accessToken;
     }
@@ -67,7 +69,7 @@ public class AccessToken {
      *
      * @return Http client
      */
-    public CloseableHttpClient getHttpClient() {
+    private CloseableHttpClient getHttpClient() {
         return buildDefaultClient();
     }
 
@@ -76,7 +78,7 @@ public class AccessToken {
      *
      * @return
      */
-    public CloseableHttpClient buildDefaultClient() {
+    private CloseableHttpClient buildDefaultClient() {
         logger.debug("requesting http client connection client open");
         Integer timeout = Constants.REQUEST_TIMEOUT;
         RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout * 1000).setConnectionRequestTimeout(timeout * 1000).setSocketTimeout(timeout * 1000).build();

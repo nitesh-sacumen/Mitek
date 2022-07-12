@@ -47,6 +47,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
 
         @Attribute(order = 800, requiredValue = true)
         Integer timeoutValue();
+
+        @Attribute(order = 900, requiredValue = true)
+        String APIUrl();
     }
 
     /**
@@ -78,6 +81,7 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.MAX_RETAKE_COUNT, config.retakeCount());
         sharedState.put(Constants.MAX_RETRY_COUNT, config.retryCount());
         sharedState.put(Constants.TIMEOUT_VALUE, config.timeoutValue());
+        sharedState.put(Constants.API_URL, config.APIUrl());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 

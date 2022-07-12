@@ -54,7 +54,7 @@ public class CaptureFront extends SingleOutcomeNode {
             return buildCallbacks(Constants.JS_URL, Constants.DOCUMENT_VERIFICATION_OPTION);
         } else {
             Boolean isVerificationRefresh = false;
-            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean() == true) {
+            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean()) {
                 isVerificationRefresh = true;
                 sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
             }
