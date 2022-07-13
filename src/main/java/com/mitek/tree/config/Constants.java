@@ -33,12 +33,13 @@ public final class Constants {
     public static final String IS_RETAKE = "isRetake";
     public static final String RETRY_COUNT = "retry_count";
     public static final String PDF_417_CODE = "pdf_417_code";
-
     public static final String BACK_VERIFICATION_OPTION = "PDF417_BARCODE";
     public static final String DOCUMENT_VERIFICATION_OPTION = "DOCUMENT";
     public static final String PASSPORT_VERIFICATION_OPTION = "PASSPORT";
     public static final String SELFIE_VERIFICATION_OPTION = "SELFIE";
-    public static final String JS_URL = "js_url";
+    public static final String MITEK_FOLDER_URL = "mitek_folder_url";
+    public static final String SCRIPT_FILE_URL = "/script.js";
+    public static final String STYLE_FILE_URL = "/style.css";
     public static final String MAX_RETAKE_COUNT = "max_retake_count";
     public static final String MAX_RETRY_COUNT = "max_retry_count";
     public static final String TIMEOUT_VALUE = "timeout_value";

@@ -8,7 +8,7 @@ import com.mitek.tree.config.Constants;
  */
 public class SelfieScript {
 
-    public static String getSelfieScript(String scriptURL, String verificationChoice) {
+    public static String getSelfieScript(String scriptURL, String verificationChoice, String styleFilePath) {
         String removeScript = RemoveElements.removeElements();
         return removeScript +
                 "var loadJS = function(url, implementationCode, location){\r\n" +
@@ -18,7 +18,7 @@ public class SelfieScript {
                 "var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
-                "link.href = '/mitek/style.css';\r\n" +
+                "link.href = '" + styleFilePath + "';\r\n" +
                 "document.getElementById('loginButton_0').style.display = 'none';\n" + "scriptTag.appendChild(link);\r\n" + "location.appendChild(scriptTag);\r\n" + "};\r\n" + "var input = document.createElement('input');\r\n" + "input.setAttribute('type', 'hidden');\r\n" + "input.setAttribute('id', 'integratorDocTypeInput');\r\n" + "input.setAttribute('value','" + verificationChoice + "');\r\n" + "document.body.appendChild(input);\r\n" +
                 "var capturedTimeout = document.createElement('input');\n" + "capturedTimeout.id = 'capturedTimeout';\n" + "capturedTimeout.type = 'hidden';\n" + "capturedTimeout.value = '';\n" + "document.body.appendChild(capturedTimeout);\n" +
                 "var interval = setInterval(function () {\n" + "var imageData = document.getElementById('capturedImage').src;\n" +

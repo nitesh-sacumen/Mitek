@@ -16,7 +16,7 @@ public class CaptureFrontScript {
                 "}\n";
     }
 
-    public static String getCaptureFrontScript(String scriptURL, String identityChoice) {
+    public static String getCaptureFrontScript(String scriptURL, String identityChoice, String styleFilePath) {
         return
                 "var loadJS = function(url, implementationCode, location){\r\n" +
                         "var scriptTag = document.createElement('script');\r\n" +
@@ -25,7 +25,7 @@ public class CaptureFrontScript {
                         "var link = document.createElement('link');\r\n" +
                         "link.rel = 'stylesheet';\r\n" +
                         "link.type = 'text/css';\r\n" +
-                        "link.href = '/mitek/style.css';\r\n" +
+                        "link.href = '" + styleFilePath + "';\r\n" +
                         "document.getElementById('loginButton_0').style.display = 'none';\n" +
                         "scriptTag.appendChild(link);\r\n" +
                         "location.appendChild(scriptTag);\r\n" + "};\r\n" +
