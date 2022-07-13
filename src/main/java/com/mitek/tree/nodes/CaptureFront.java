@@ -51,8 +51,7 @@ public class CaptureFront extends SingleOutcomeNode {
         if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         } else if (context.getCallback(ConfirmationCallback.class).isPresent()) {
-            String scriptFilePath = sharedState.get(Constants.JS_URL).asString();
-            return buildCallbacks(scriptFilePath, Constants.DOCUMENT_VERIFICATION_OPTION);
+            return buildCallbacks(Constants.JS_URL, Constants.DOCUMENT_VERIFICATION_OPTION);
         } else {
             Boolean isVerificationRefresh = false;
             if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean()) {
