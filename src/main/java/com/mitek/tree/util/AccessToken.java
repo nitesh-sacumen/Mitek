@@ -37,19 +37,15 @@ public class AccessToken {
         String accessToken = null;
         JsonValue sharedState = context.sharedState;
         HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
-        try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient()) {
+        try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient(context)) {
             HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.API_TOKEN_URL);
             addParamsToPostRequest(context, httpPost);
-
             CloseableHttpResponse response = httpclient.execute(httpPost);
-
             Integer responseCode = response.getStatusLine().getStatusCode();
-
             if (responseCode != 200) {
                 logger.error("Error while retrieving access token: " + "response code : " + responseCode);
                 throw new NodeProcessException("responseCode : " + responseCode);
             }
-
             HttpEntity entityResponse = response.getEntity();
             String result = EntityUtils.toString(entityResponse);
             JSONObject jsonResponse = new JSONObject(result);

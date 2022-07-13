@@ -5,7 +5,7 @@ package com.mitek.tree.util;
  * This class contains js script which will use to get back side image of document.
  */
 public class CaptureBackScript {
-    public static String getCaptureBackScript(String scriptURL, String verificationChoice) {
+    public static String getCaptureBackScript(String scriptURL, String verificationChoice, String styleFilePath) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +
@@ -13,7 +13,7 @@ public class CaptureBackScript {
                 "var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
-                "link.href = '/mitek/style.css';\r\n" +
+                "link.href = '" + styleFilePath + "';\r\n" +
                 "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +

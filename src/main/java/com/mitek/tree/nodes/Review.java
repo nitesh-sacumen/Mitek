@@ -45,7 +45,7 @@ public class Review implements Node {
     }
 
     @Inject
-    public Review(AccessToken accessToken,VerifyDocument verifyDocument) {
+    public Review(AccessToken accessToken, VerifyDocument verifyDocument) {
         this.accessToken = accessToken;
         this.verifyDocument = verifyDocument;
     }
@@ -93,16 +93,17 @@ public class Review implements Node {
             }
         }
         Integer maxRetakeCount = sharedState.get(Constants.MAX_RETAKE_COUNT).asInteger();
-        return buildCallbacks(retakeCount, maxRetakeCount);
+        String styleFilePath = sharedState.get(Constants.MITEK_FOLDER_URL).asString() + Constants.STYLE_FILE_URL;
+        return buildCallbacks(retakeCount, maxRetakeCount, styleFilePath);
     }
 
     /**
      * @param retakeCount Number of retakes for image capture
      * @return Action, Which will redirect to next action
      */
-    private Action buildCallbacks(Integer retakeCount, Integer maxRetakeCount) {
+    private Action buildCallbacks(Integer retakeCount, Integer maxRetakeCount, String styleFilePath) {
         return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(ReviewScript.getReviewScript(retakeCount, maxRetakeCount)));
+            add(new ScriptTextOutputCallback(ReviewScript.getReviewScript(retakeCount, maxRetakeCount, styleFilePath)));
             add(new HiddenValueCallback("isRetake"));
             add(new HiddenValueCallback("front"));
             add(new HiddenValueCallback("selfie"));
