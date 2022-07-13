@@ -2,7 +2,6 @@ package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.nodes.Review;
-import com.mitek.tree.nodes.Selfie;
 import com.mitek.tree.util.AccessToken;
 import com.mitek.tree.util.VerifyDocument;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;

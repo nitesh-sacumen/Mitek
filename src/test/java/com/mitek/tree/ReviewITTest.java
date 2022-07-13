@@ -3,20 +3,22 @@ package com.mitek.tree;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.nodes.Review;
+import com.mitek.tree.util.AccessToken;
 import com.mitek.tree.util.VerifyDocument;
+import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
 import org.forgerock.openam.auth.node.api.NodeProcessException;
 import org.forgerock.openam.auth.node.api.TreeContext;
-import org.junit.After;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import javax.security.auth.callback.Callback;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,9 +30,9 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-public class VerifyDocumentTest {
+public class ReviewITTest {
     @InjectMocks
-    private VerifyDocument verifyDocument;
+    Review review;
 
     @Rule
     public WireMockRule wireMockRule;
@@ -46,49 +48,80 @@ public class VerifyDocumentTest {
         initMocks(this);
     }
 
-    @Test
-    public void testVerifyWithFailedProcessingStatus() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList());
-        wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
-                .willReturn(aResponse().withBody(response("Failed",false))
-                        .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
-        JsonValue jsonValue = treeContext.sharedState;
-        Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_retry");
-    }
 
     @Test
-    public void testVerifyWithFailedProcessingStatusAndAuthenticated() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList());
-        wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
-                .willReturn(aResponse().withBody(response("Failed",true))
+    public void testReviewWithWaitOutcome() throws NodeProcessException {
+        review = new Review(new AccessToken(),new VerifyDocument());
+        wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
+                .willReturn(aResponse().withBody("{\n" +
+                                "  \"access_token\" :\"test123\"\n" +
+                                "}")
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
-        JsonValue jsonValue = treeContext.sharedState;
-        Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_retry");
-    }
-
-    @Test
-    public void testVerifyWithSuccessProcessingStatus() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",true))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
-        JsonValue jsonValue = treeContext.sharedState;
-        Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_success");
+
+        HiddenValueCallback hcb1 = new HiddenValueCallback("front");
+        HiddenValueCallback hcb2 = new HiddenValueCallback("selfie");
+        HiddenValueCallback hcb3 = new HiddenValueCallback("passport");
+        HiddenValueCallback hcb4 = new HiddenValueCallback("back");
+
+        hcb1.setValue("data,frontImage");
+        hcb2.setValue("data,selfieImage");
+        hcb3.setValue("data,passportImage");
+        hcb4.setValue("data,backImage");
+
+        List<Callback> cbList = new ArrayList<>();
+        HiddenValueCallback hcb = new HiddenValueCallback("isRetake");
+        hcb.setValue("false");
+        cbList.add(hcb);
+        cbList.add(hcb1);
+        cbList.add(hcb2);
+        cbList.add(hcb3);
+        cbList.add(hcb4);
+        TreeContext treeContext = buildThreeContext(cbList);
+        Action action = review.process(treeContext);
+        String outcome = action.outcome;
+        Assert.assertEquals(outcome,"Wait");
     }
 
     @Test
-    public void testVerifyWithSuccessProcessingStatusAndUnAuthenicated() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList());
-        wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
-                .willReturn(aResponse().withBody(response("Successful",false))
+    public void testReviewWithNullAcccessToken(){
+        review = new Review(new AccessToken(),new VerifyDocument());
+        wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
+                .willReturn(aResponse().withBody("{}")
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
-        JsonValue jsonValue = treeContext.sharedState;
-        Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_failure");
+
+        HiddenValueCallback hcb1 = new HiddenValueCallback("front");
+        HiddenValueCallback hcb2 = new HiddenValueCallback("selfie");
+        HiddenValueCallback hcb3 = new HiddenValueCallback("passport");
+        HiddenValueCallback hcb4 = new HiddenValueCallback("back");
+
+        hcb1.setValue("data,frontImage");
+        hcb2.setValue("data,selfieImage");
+        hcb3.setValue("data,passportImage");
+        hcb4.setValue("data,backImage");
+
+        List<Callback> cbList = new ArrayList<>();
+        HiddenValueCallback hcb = new HiddenValueCallback("isRetake");
+        hcb.setValue("false");
+        cbList.add(hcb);
+        cbList.add(hcb1);
+        cbList.add(hcb2);
+        cbList.add(hcb3);
+        cbList.add(hcb4);
+
+        TreeContext treeContext = buildThreeContext(cbList);
+        Exception exception = Assert.expectThrows(NodeProcessException.class, () -> {
+            review.process(treeContext);
+        });
+
+        String expectedMessage = "Caught exception while generating access token, Invalid response from get access token API!";
+        String actualMessage = exception.getMessage();
+        Assert.assertEquals(actualMessage,expectedMessage);
     }
+
+
 
 
     private TreeContext buildThreeContext(List<Callback> callbacks) {
@@ -105,11 +138,6 @@ public class VerifyDocumentTest {
                 field(Constants.SCOPE, "test"),
                 field(Constants.API_URL,"http://localhost:"+wireMockPort),
                 field(Constants.TIMEOUT_VALUE,30)));
-    }
-
-    @After
-    public void tearDown() {
-        wireMockRule.stop();
     }
 
     private String response(String processingStatus,boolean isAuthenticated){

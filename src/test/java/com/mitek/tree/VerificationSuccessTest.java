@@ -1,7 +1,6 @@
 package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
-import com.mitek.tree.nodes.VerificationFailure;
 import com.mitek.tree.nodes.VerificationSuccess;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;

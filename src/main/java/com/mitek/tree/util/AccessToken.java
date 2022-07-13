@@ -51,12 +51,15 @@ public class AccessToken {
             JSONObject jsonResponse = new JSONObject(result);
             if (jsonResponse.has("access_token")) {
                 accessToken = jsonResponse.getString("access_token");
+                return accessToken;
+            }else{
+                logger.error("Invalid response from get access token API!!");
+                throw new NodeProcessException("Invalid response from get access token API!");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
             throw new NodeProcessException("Caught exception while generating access token, " + e.getLocalizedMessage());
         }
-        return accessToken;
     }
 
     /**

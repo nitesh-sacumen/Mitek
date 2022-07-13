@@ -38,8 +38,6 @@ public class AccessTokenTest {
     String wireMockPort;
 
 
-    private TreeContext context;
-
     @BeforeMethod
     public void before() {
         wireMockRule = new WireMockRule(wireMockConfig().dynamicPort());
@@ -86,7 +84,8 @@ public class AccessTokenTest {
                 field(Constants.CLIENT_SECRET, "secret"),
                 field(Constants.GRANT_TYPE, "testGrant"),
                 field(Constants.SCOPE, "test"),
-                field(Constants.API_URL,"http://localhost:"+wireMockPort)));
+                field(Constants.API_URL,"http://localhost:"+wireMockPort),
+                field(Constants.TIMEOUT_VALUE,30)));
     }
 
     @After

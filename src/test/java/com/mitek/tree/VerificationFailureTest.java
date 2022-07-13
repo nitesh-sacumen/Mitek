@@ -1,9 +1,7 @@
 package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
-import com.mitek.tree.nodes.Selfie;
 import com.mitek.tree.nodes.VerificationFailure;
-import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;

@@ -61,6 +61,7 @@ public class MitekConfigurationTest {
         Mockito.when(config.scope()).thenReturn("test");
         Mockito.when(config.timeoutValue()).thenReturn(3000);
         Mockito.when(config.consentData()).thenReturn("consent data");
+        Mockito.when(config.scriptFolderPath()).thenReturn("/home");
 
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
 
@@ -75,6 +76,7 @@ public class MitekConfigurationTest {
         Assert.assertEquals(jsonValue.get(Constants.SCOPE).asString(),"test");
         Assert.assertEquals(jsonValue.get(Constants.TIMEOUT_VALUE).asInteger(),3000);
         Assert.assertEquals(jsonValue.get(Constants.CONSENT_DATA).asString(),"consent data");
+        Assert.assertEquals(jsonValue.get(Constants.MITEK_FOLDER_URL).asString(),"/home");
 
         Assert.assertNotNull(action);
     }

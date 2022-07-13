@@ -1,7 +1,6 @@
 package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
-import com.mitek.tree.nodes.CaptureBack;
 import com.mitek.tree.nodes.CaptureFront;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import org.forgerock.json.JsonValue;

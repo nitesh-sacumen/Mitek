@@ -1,7 +1,6 @@
 package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
-import com.mitek.tree.nodes.Consent;
 import com.mitek.tree.nodes.Selfie;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
 import org.forgerock.json.JsonValue;
@@ -15,7 +14,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.ConfirmationCallback;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

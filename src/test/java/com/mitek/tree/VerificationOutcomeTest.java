@@ -1,7 +1,6 @@
 package com.mitek.tree;
 
 import com.mitek.tree.config.Constants;
-import com.mitek.tree.nodes.VerificationFailure;
 import com.mitek.tree.nodes.VerificationOutcome;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
@@ -14,8 +13,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.ConfirmationCallback;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
