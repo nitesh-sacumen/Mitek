@@ -45,9 +45,8 @@ public class Selfie extends SingleOutcomeNode {
         if (context.getCallback(HiddenValueCallback.class).isPresent() && context.getCallback(HiddenValueCallback.class).get().getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
             return goToNext().replaceSharedState(sharedState).build();
         }
-        String scriptFilePath = sharedState.get(Constants.MITEK_FOLDER_URL).asString() + Constants.SCRIPT_FILE_URL;
-        String styleFilePath = sharedState.get(Constants.MITEK_FOLDER_URL).asString() + Constants.STYLE_FILE_URL;
-        return buildCallbacks(scriptFilePath, Constants.SELFIE_VERIFICATION_OPTION, styleFilePath);
+        String scriptFilePath = sharedState.get(Constants.JS_URL).asString();
+        return buildCallbacks(scriptFilePath, Constants.SELFIE_VERIFICATION_OPTION);
     }
 
     /**
@@ -55,10 +54,10 @@ public class Selfie extends SingleOutcomeNode {
      * @param verificationChoice Type of verification eg: Passport/selfie/DL/ID
      * @return Action, Which will redirect to next action.
      */
-    private Action buildCallbacks(String url, String verificationChoice, String styleFilePath) {
+    private Action buildCallbacks(String url, String verificationChoice) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after selfie image capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(SelfieScript.getSelfieScript(url, verificationChoice, styleFilePath)));
+            add(new ScriptTextOutputCallback(SelfieScript.getSelfieScript(url, verificationChoice)));
             add(new HiddenValueCallback("captureSelfieResponse"));
         }}).build();
     }

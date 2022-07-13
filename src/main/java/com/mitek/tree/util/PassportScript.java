@@ -16,7 +16,7 @@ public class PassportScript {
                 "}\n";
     }
 
-    public static String getPassportScript(String scriptURL, String verificationChoice, String styleFilePath) {
+    public static String getPassportScript(String scriptURL, String verificationChoice) {
         return "var loadJS = function(url, implementationCode, location){\r\n" +
                 "var scriptTag = document.createElement('script');\r\n" +
                 "scriptTag.id='mitekScript';\n" +
@@ -24,7 +24,7 @@ public class PassportScript {
                 "var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
-                "link.href = '" + styleFilePath + "';\r\n" +
+                "link.href = '/mitek/style.css';\r\n" +
                 "document.getElementById('loginButton_0').style.display = 'none';\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "location.appendChild(scriptTag);\r\n" + "};\r\n" +

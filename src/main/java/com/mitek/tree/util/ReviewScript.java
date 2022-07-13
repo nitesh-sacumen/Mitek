@@ -5,7 +5,7 @@ package com.mitek.tree.util;
  * This class contains js script which will use to get image of front, back, selfie and passport.
  */
 public class ReviewScript {
-    public static String getReviewScript(Integer retakeCount, Integer maxRetakeCount, String styleFilePath) {
+    public static String getReviewScript(Integer retakeCount, Integer maxRetakeCount) {
         String removeScript = RemoveElements.removeElements();
         return removeScript +
                 "document.getElementById('loginButton_0').style.display='none';\n" +
@@ -73,7 +73,7 @@ public class ReviewScript {
                 "var link = document.createElement('link');\r\n" +
                 "link.rel = 'stylesheet';\r\n" +
                 "link.type = 'text/css';\r\n" +
-                "link.href = '" + styleFilePath + "';\r\n" +
+                "link.href = '/mitek/style.css';\r\n" +
                 "scriptTag.appendChild(link);\r\n" +
                 "document.body.appendChild(scriptTag);\r\n" +
                 "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
