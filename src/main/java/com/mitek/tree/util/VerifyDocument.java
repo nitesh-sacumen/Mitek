@@ -29,95 +29,76 @@ public class VerifyDocument {
 
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        JSONObject jsonResponse;
+        JSONObject data, parentObj, obj, jsonResponse;
+        JSONArray images, evidence;
         Integer responseCode;
         if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
-            Images images = new Images();
-            JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, selfieData);
-            jsonResponse = verify(context, parentObj, accessToken);
-            responseCode = sharedState.get(Constants.VERIFY_RESPONSE_CODE).asInteger();
-            if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408
-                    || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503
-                    || responseCode == 504) {
-                sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
-            } else {
-                checkResponse(jsonResponse, context);
+            String[] imageData = passportData.startsWith(Constants.BASE64_STARTS_WITH) ? passportData.split(",") : frontData.split(",");
+            data = new JSONObject();
+            data.put("data", imageData[1]);
+            images = new JSONArray();
+            images.put(data);
+            evidence = new JSONArray();
+            parentObj = new JSONObject();
+            obj = new JSONObject();
+            obj.put("type", "IdDocument");
+            if (backImageCode != null) {
+                images.put(Images.getBackImageObject(backImageCode));
             }
-        }
-    }
+            obj.put("images", images);
+            evidence.put(obj);
+            if (selfieData.startsWith(Constants.BASE64_STARTS_WITH)) {
+                evidence.put(Images.getSelfieObject(selfieData));
+                parentObj.put("configuration", Images.getSelfieConfigurationObject());
+            }
+            parentObj.put("evidence", evidence);
+            HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
+            HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.VERIFY_DOCUMENT_API_URL);
+            httpPost.addHeader("Accept", "application/json");
+            httpPost.addHeader("Content-Type", "application/json");
+            httpPost.addHeader("Authorization", "Bearer " + accessToken);
+            try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient()) {
+                StringEntity stringEntity = new StringEntity(parentObj.toString());
+                httpPost.setEntity(stringEntity);
+                CloseableHttpResponse response = httpclient.execute(httpPost);
+                responseCode = response.getStatusLine().getStatusCode();
+                logger.debug("verify document api response code: " + responseCode);
+                HttpEntity entityResponse = response.getEntity();
+                String result = EntityUtils.toString(entityResponse);
+                jsonResponse = new JSONObject(result);
+            } catch (ConnectTimeoutException | SocketTimeoutException e) {
+                logger.error(e.getMessage());
+                throw new NodeProcessException("Exception is: " + e);
+            } catch (Exception e) {
+                logger.error(e.getMessage());
+                throw new NodeProcessException("Exception is: " + e);
+            }
 
-    private void checkResponse(JSONObject jsonResponse, TreeContext context) {
-        JsonValue sharedState = context.sharedState;
-        String referenceId, processingStatus;
-        JSONObject dossierMetadataObj, evidenceObject, imageObject, findings;
-        JSONArray evidenceList, imagesList;
-        Boolean flag, isAuthenticated;
-        if (jsonResponse.has("dossierMetadata")) {
-            dossierMetadataObj = (JSONObject) jsonResponse.get("dossierMetadata");
-            referenceId = dossierMetadataObj.get("dossierId").toString();
-            sharedState.put(Constants.VERIFICATION_REFERENCE_ID, referenceId);
-            if (jsonResponse.has("evidence")) {
-                evidenceList = jsonResponse.getJSONArray("evidence");
-                flag = false;
-                for (Integer j = 0; j < evidenceList.length(); j++) {
-                    evidenceObject = evidenceList.getJSONObject(j);
-                    if (evidenceObject.has("images")) {
-                        imagesList = evidenceObject.getJSONArray("images");
-                        for (Integer k = 0; k < imagesList.length(); k++) {
-                            imageObject = imagesList.getJSONObject(k);
-                            processingStatus = imageObject.getString("processingStatus");
-                            if (processingStatus != null && processingStatus.equalsIgnoreCase("Failed")) {
-                                flag = true;//case of failed image processing
-                                break;
-                            }
-                        }
-                    }
+
+            Integer timeoutValue = sharedState.get(Constants.TIMEOUT_VALUE).asInteger();
+            Boolean flag;
+            for (Integer i = 1; i <= timeoutValue; i++) {
+                //400 Bad Request/ 401 Unauthorized/ 403 Forbidden/ 408 Request Timeout/ 415 Unsupported Media Type/
+                // 500 Internal Server Error/ 502 Bad Gateway/ 503 Service Unavailable/ 504 Gateway Timeout
+                if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408
+                        || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503
+                        || responseCode == 504) {
+                    logger.debug("error response code is:: " + responseCode);
+                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
+                    break;
+                } else {
+                    flag = VerifyApiResponse.checkResponse(jsonResponse, context);
                     if (flag) {
                         break;
                     }
                 }
-                if (flag) {
-                    sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_RETRY);
-                    logger.debug("one or more image processing failed");
-                } else {
-                    if (jsonResponse.has("findings")) {
-                        findings = (JSONObject) jsonResponse.get("findings");
-                        isAuthenticated = (Boolean) findings.get("authenticated");
-                        if (isAuthenticated) {
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_SUCCESS);
-                        } else {
-                            sharedState.put(Constants.VERIFICATION_RESULT, Constants.VERIFICATION_FAILURE);
-                        }
-                    }
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                    throw new NodeProcessException("Exception is: " + e);
                 }
             }
         }
-    }
-
-    private JSONObject verify(TreeContext context, JSONObject parentObj, String accessToken) throws NodeProcessException {
-        JSONObject jsonResponse = null;
-        JsonValue sharedState = context.sharedState;
-        HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
-        HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.VERIFY_DOCUMENT_API_URL);
-        httpPost.addHeader("Accept", "application/json");
-        httpPost.addHeader("Content-Type", "application/json");
-        httpPost.addHeader("Authorization", "Bearer " + accessToken);
-        try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient(context)) {
-            StringEntity stringEntity = new StringEntity(parentObj.toString());
-            httpPost.setEntity(stringEntity);
-            CloseableHttpResponse response = httpclient.execute(httpPost);
-            Integer responseCode = response.getStatusLine().getStatusCode();
-            logger.debug("verify document api response code: " + responseCode);
-            sharedState.put(Constants.VERIFY_RESPONSE_CODE, responseCode);
-            HttpEntity entityResponse = response.getEntity();
-            String result = EntityUtils.toString(entityResponse);
-            jsonResponse = new JSONObject(result);
-        } catch (ConnectTimeoutException | SocketTimeoutException e) {
-            logger.error(e.getMessage());
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            throw new NodeProcessException("Exception is: " + e);
-        }
-        return jsonResponse;
     }
 }
