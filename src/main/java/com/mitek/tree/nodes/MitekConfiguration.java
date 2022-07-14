@@ -90,9 +90,9 @@ public class MitekConfiguration extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        if (config.clientId().equals("") || config.clientSecret().equals("") ||
-                config.scope().equals("") || config.grantType().equals("")
-                || config.APIUrl().equals("") || config.scriptFolderPath().equals("")) {
+        if (config.clientId() == null || config.clientSecret() == null ||
+                config.scope() == null || config.grantType() == null ||
+                config.APIUrl() == null || config.scriptFolderPath() == null) {
             logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/APIUrl/scriptFolderPath to proceed");
             throw new NodeProcessException("Invalid/Missing credentials!!");
         }
@@ -101,9 +101,12 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.SCOPE, config.scope());
         sharedState.put(Constants.GRANT_TYPE, config.grantType());
         sharedState.put(Constants.CONSENT_DATA, config.consentData());
-        sharedState.put(Constants.MAX_RETAKE_COUNT, config.retakeCount());
-        sharedState.put(Constants.MAX_RETRY_COUNT, config.retryCount());
-        sharedState.put(Constants.TIMEOUT_VALUE, config.timeoutValue());
+        Integer retakeCount = config.retakeCount() == null ? 0 : Math.abs(config.retakeCount());
+        sharedState.put(Constants.MAX_RETAKE_COUNT, retakeCount);
+        Integer retryCount = config.retryCount() == null ? 0 : Math.abs(config.retryCount());
+        sharedState.put(Constants.MAX_RETRY_COUNT, retryCount);
+        Integer timeoutValue = config.timeoutValue() == null ? 0 : Math.abs(config.timeoutValue());
+        sharedState.put(Constants.TIMEOUT_VALUE, timeoutValue);
         sharedState.put(Constants.API_URL, config.APIUrl());
         sharedState.put(Constants.MITEK_FOLDER_URL, config.scriptFolderPath());
         return goToNext().replaceSharedState(context.sharedState).build();
