@@ -25,34 +25,54 @@ public class MitekConfiguration extends SingleOutcomeNode {
     public interface Config {
 
         @Attribute(order = 100)
-        String consentData();
+        default String consentData() {
+            return "";
+        }
 
         @Attribute(order = 200, requiredValue = true)
-        String clientId();
+        default String clientId() {
+            return "";
+        }
 
         @Attribute(order = 300, requiredValue = true)
-        String clientSecret();
+        default String clientSecret() {
+            return "";
+        }
 
         @Attribute(order = 400, requiredValue = true)
-        String scope();
+        default String scope() {
+            return "";
+        }
 
         @Attribute(order = 500, requiredValue = true)
-        String grantType();
+        default String grantType() {
+            return "";
+        }
 
         @Attribute(order = 600, requiredValue = true)
-        Integer retakeCount();
+        default Integer retakeCount() {
+            return 0;
+        }
 
         @Attribute(order = 700, requiredValue = true)
-        Integer retryCount();
+        default Integer retryCount() {
+            return 0;
+        }
 
         @Attribute(order = 800, requiredValue = true)
-        Integer timeoutValue();
+        default Integer timeoutValue() {
+            return 0;
+        }
 
         @Attribute(order = 900, requiredValue = true)
-        String APIUrl();
+        default String APIUrl() {
+            return "";
+        }
 
         @Attribute(order = 1000, requiredValue = true)
-        String scriptFolderPath();
+        default String scriptFolderPath() {
+            return "";
+        }
     }
 
     /**
@@ -70,12 +90,11 @@ public class MitekConfiguration extends SingleOutcomeNode {
     @Override
     public Action process(TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
-        if (config.clientId() == null || config.clientSecret() == null ||
-                config.scope() == null || config.grantType() == null
-                || config.retakeCount() == null || config.retryCount() == null || config.timeoutValue() == null
-                || config.APIUrl() == null || config.scriptFolderPath() == null) {
-            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/retakeCount/retryCount/timeoutValue/APIUrl/scriptFolderPath to proceed");
-            throw new NodeProcessException("Invalid credentials!!");
+        if (config.clientId().equals("") || config.clientSecret().equals("") ||
+                config.scope().equals("") || config.grantType().equals("")
+                || config.APIUrl().equals("") || config.scriptFolderPath().equals("")) {
+            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/APIUrl/scriptFolderPath to proceed");
+            throw new NodeProcessException("Invalid/Missing credentials!!");
         }
         sharedState.put(Constants.CLIENT_ID, config.clientId());
         sharedState.put(Constants.CLIENT_SECRET, config.clientSecret());

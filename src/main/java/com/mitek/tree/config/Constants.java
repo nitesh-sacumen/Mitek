@@ -38,8 +38,8 @@ public final class Constants {
     public static final String PASSPORT_VERIFICATION_OPTION = "PASSPORT";
     public static final String SELFIE_VERIFICATION_OPTION = "SELFIE";
     public static final String MITEK_FOLDER_URL = "mitek_folder_url";
-    public static final String SCRIPT_FILE_URL = "/script.js";
-    public static final String STYLE_FILE_URL = "/style.css";
+    public static final String SCRIPT_FILE_URL = "script.js";
+    public static final String STYLE_FILE_URL = "style.css";
     public static final String MAX_RETAKE_COUNT = "max_retake_count";
     public static final String MAX_RETRY_COUNT = "max_retry_count";
     public static final String TIMEOUT_VALUE = "timeout_value";
