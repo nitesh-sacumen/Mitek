@@ -52,6 +52,8 @@ public class VerificationOptions implements Node {
     private Action collectRegField() {
         logger.debug("Collecting Verification Options");
         List<Callback> cbList = new ArrayList<>();
+        ScriptTextOutputCallback scriptTextOutputCallback = new ScriptTextOutputCallback(VerificationOptionsScript.getVerificationOptionsScript());
+        cbList.add(scriptTextOutputCallback);
         String[] choices = {"Passport", "DL/ID"};
         cbList.add(new ChoiceCallback("Which type of document would you like to submit?", choices, 0, false));
         String[] submitButton = {"Next"};
@@ -68,14 +70,6 @@ public class VerificationOptions implements Node {
         try {
             logger.debug("*********************Verification Options node********************");
             JsonValue sharedState = context.sharedState;
-            Boolean isVerificationOptionsRefresh;
-            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean()) {
-                isVerificationOptionsRefresh = sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean();
-                if (isVerificationOptionsRefresh) {
-                    sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
-                    return buildCallbacks();
-                }
-            }
             if (!context.getCallback(ChoiceCallback.class).isEmpty()) {
                 String existingVerificationChoice = null;
                 if (sharedState.get(Constants.VERIFICATION_CHOICE).isNotNull()) {
@@ -136,14 +130,6 @@ public class VerificationOptions implements Node {
          */
         PASSPORT
     }
-
-    private Action buildCallbacks() {
-        return send(new ArrayList<>() {{
-            add(new ScriptTextOutputCallback(VerificationOptionsScript.getVerificationOptionsScript()));
-        }}).build();
-
-    }
-
 
     /**
      * This class will create customized outcome for the node.

@@ -101,11 +101,11 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.SCOPE, config.scope());
         sharedState.put(Constants.GRANT_TYPE, config.grantType());
         sharedState.put(Constants.CONSENT_DATA, config.consentData());
-        Integer retakeCount = config.retakeCount() == null ? 0 : Math.abs(config.retakeCount());
+        Integer retakeCount = config.retakeCount() == null || (config.retakeCount() != null && String.valueOf(config.retakeCount()).isBlank()) ? 0 : Math.abs(config.retakeCount());
         sharedState.put(Constants.MAX_RETAKE_COUNT, retakeCount);
-        Integer retryCount = config.retryCount() == null ? 0 : Math.abs(config.retryCount());
+        Integer retryCount = config.retryCount() == null || (config.retryCount() != null && String.valueOf(config.retryCount()).isBlank()) ? 0 : Math.abs(config.retryCount());
         sharedState.put(Constants.MAX_RETRY_COUNT, retryCount);
-        Integer timeoutValue = config.timeoutValue() == null ? 0 : Math.abs(config.timeoutValue());
+        Integer timeoutValue = config.timeoutValue() == null || (config.timeoutValue() != null && String.valueOf(config.timeoutValue()).isBlank()) ? 0 : Math.abs(config.timeoutValue());
         sharedState.put(Constants.TIMEOUT_VALUE, timeoutValue);
         sharedState.put(Constants.API_URL, config.APIUrl());
         sharedState.put(Constants.MITEK_FOLDER_URL, config.scriptFolderPath());

@@ -7,13 +7,11 @@ import com.mitek.tree.config.Constants;
  * This class contains js script which will use to get image of passport.
  */
 public class PassportScript {
-    public static String getScript(Boolean isVerificationRefresh) {
+    public static String getScript() {
         String removeScript = RemoveElements.removeElements();
         String footerScript = FooterScript.getFooterScript();
         return removeScript +
-                "if(" + isVerificationRefresh + "){\n" +
-                footerScript +
-                "}\n";
+                footerScript;
     }
 
     public static String getPassportScript(String scriptURL, String verificationChoice, String styleFilePath) {

@@ -7,13 +7,11 @@ import com.mitek.tree.config.Constants;
  * This class contains js script which will use to get front side image of document.
  */
 public class CaptureFrontScript {
-    public static String getScript(Boolean isVerificationRefresh) {
+    public static String getScript() {
         String removeScript = RemoveElements.removeElements();
         String footerScript = FooterScript.getFooterScript();
         return removeScript +
-                "if(" + isVerificationRefresh + "){\n" +
-                footerScript +
-                "}\n";
+                footerScript;
     }
 
     public static String getCaptureFrontScript(String scriptURL, String identityChoice, String styleFilePath) {

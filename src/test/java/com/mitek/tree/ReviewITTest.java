@@ -51,7 +51,7 @@ public class ReviewITTest {
 
     @Test
     public void testReviewWithWaitOutcome() throws NodeProcessException {
-        review = new Review(new AccessToken(),new VerifyDocument());
+        //review = new Review(new AccessToken(),new VerifyDocument());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse().withBody("{\n" +
                                 "  \"access_token\" :\"test123\"\n" +
@@ -87,7 +87,7 @@ public class ReviewITTest {
 
     @Test
     public void testReviewWithNullAcccessToken(){
-        review = new Review(new AccessToken(),new VerifyDocument());
+        //review = new Review(new AccessToken(),new VerifyDocument());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse().withBody("{}")
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));

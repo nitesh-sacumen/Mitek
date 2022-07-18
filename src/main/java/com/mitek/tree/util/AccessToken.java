@@ -14,6 +14,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -28,15 +29,21 @@ import java.util.stream.Collectors;
 public class AccessToken {
     private static final Logger logger = LoggerFactory.getLogger(AccessToken.class);
 
+    HttpConnectionClient httpConnectionClient;
+
+    @Inject
+    public AccessToken(HttpConnectionClient httpConnectionClient) {
+        this.httpConnectionClient = httpConnectionClient;
+    }
+
     /**
      * @param context TreeContext object
      * @return Access token
      * @throws NodeProcessException
      */
     public String getAccessToken(TreeContext context) throws NodeProcessException {
-        String accessToken = null;
+        String accessToken;
         JsonValue sharedState = context.sharedState;
-        HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
         try (CloseableHttpClient httpclient = httpConnectionClient.getHttpClient(context)) {
             HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.API_TOKEN_URL);
             addParamsToPostRequest(context, httpPost);

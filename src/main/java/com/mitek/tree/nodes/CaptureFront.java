@@ -55,13 +55,8 @@ public class CaptureFront extends SingleOutcomeNode {
             String styleFilePath = sharedState.get(Constants.MITEK_FOLDER_URL).asString() + Constants.STYLE_FILE_URL;
             return buildCallbacks(scriptFilePath, Constants.DOCUMENT_VERIFICATION_OPTION, styleFilePath);
         } else {
-            Boolean isVerificationRefresh = false;
-            if (sharedState.get(Constants.IS_VERIFICATION_REFRESH).isNotNull() && sharedState.get(Constants.IS_VERIFICATION_REFRESH).asBoolean()) {
-                isVerificationRefresh = true;
-                sharedState.put(Constants.IS_VERIFICATION_REFRESH, false);
-            }
             List<Callback> cbList = new ArrayList<>();
-            cbList.add(new ScriptTextOutputCallback(CaptureFrontScript.getScript(isVerificationRefresh)));
+            cbList.add(new ScriptTextOutputCallback(CaptureFrontScript.getScript()));
             cbList.add(getTextOutputCallbackObject("Capture Front of Document"));
             cbList.add(getTextOutputCallbackObject(" Use dark background"));
             cbList.add(getTextOutputCallbackObject("* Get all 4 corners of the bio-data page within the frame"));

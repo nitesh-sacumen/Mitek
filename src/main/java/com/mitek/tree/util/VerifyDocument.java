@@ -22,17 +22,25 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
 import java.net.SocketTimeoutException;
 
 public class VerifyDocument {
     private static final Logger logger = LoggerFactory.getLogger(VerifyDocument.class);
+    HttpConnectionClient httpConnectionClient;
+    Images images;
+
+    @Inject
+    public VerifyDocument(HttpConnectionClient httpConnectionClient, Images images) {
+        this.httpConnectionClient = httpConnectionClient;
+        this.images = images;
+    }
 
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
         JSONObject jsonResponse;
         Integer responseCode;
         if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
-            Images images = new Images();
             JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, selfieData);
             jsonResponse = verify(context, parentObj, accessToken);
             responseCode = sharedState.get(Constants.VERIFY_RESPONSE_CODE).asInteger();
@@ -97,7 +105,6 @@ public class VerifyDocument {
     private JSONObject verify(TreeContext context, JSONObject parentObj, String accessToken) throws NodeProcessException {
         JSONObject jsonResponse = null;
         JsonValue sharedState = context.sharedState;
-        HttpConnectionClient httpConnectionClient = new HttpConnectionClient();
         HttpPost httpPost = httpConnectionClient.createPostRequest(sharedState.get(Constants.API_URL).asString() + Constants.VERIFY_DOCUMENT_API_URL);
         httpPost.addHeader("Accept", "application/json");
         httpPost.addHeader("Content-Type", "application/json");
