@@ -78,7 +78,7 @@ public class CaptureBack extends SingleOutcomeNode {
     private Action buildCallbacks(String url, String verificationChoice, String styleFilePath) {
         return send(new ArrayList<>() {{
             add(new TextOutputCallback(0, "Please wait after image back capture, it will be displayed shortly for preview."));
-            add(new ScriptTextOutputCallback(CaptureBackScript.getCaptureBackScript(url, verificationChoice,styleFilePath)));
+            add(new ScriptTextOutputCallback(CaptureBackScript.getCaptureBackScript(url, verificationChoice, styleFilePath)));
             add(new HiddenValueCallback("captureBackResponse"));
             add(new HiddenValueCallback("captureBack"));
         }}).build();

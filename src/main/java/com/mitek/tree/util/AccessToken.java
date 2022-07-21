@@ -59,7 +59,7 @@ public class AccessToken {
             if (jsonResponse.has("access_token")) {
                 accessToken = jsonResponse.getString("access_token");
                 return accessToken;
-            }else{
+            } else {
                 logger.error("Invalid response from get access token API!!");
                 throw new NodeProcessException("Invalid response from get access token API!");
             }

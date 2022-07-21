@@ -73,6 +73,11 @@ public class MitekConfiguration extends SingleOutcomeNode {
         default String scriptFolderPath() {
             return "";
         }
+
+        @Attribute(order = 1100, requiredValue = true)
+        default String response() {
+            return "";
+        }
     }
 
     /**
@@ -92,8 +97,8 @@ public class MitekConfiguration extends SingleOutcomeNode {
         JsonValue sharedState = context.sharedState;
         if (config.clientId() == null || config.clientSecret() == null ||
                 config.scope() == null || config.grantType() == null ||
-                config.APIUrl() == null || config.scriptFolderPath() == null) {
-            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/APIUrl/scriptFolderPath to proceed");
+                config.APIUrl() == null || config.scriptFolderPath() == null || config.response() == null) {
+            logger.error("Please configure apiUrl/clientId/clientSecret/scope/grantType/APIUrl/scriptFolderPath/response to proceed");
             throw new NodeProcessException("Invalid/Missing credentials!!");
         }
         sharedState.put(Constants.CLIENT_ID, config.clientId());
@@ -109,6 +114,7 @@ public class MitekConfiguration extends SingleOutcomeNode {
         sharedState.put(Constants.TIMEOUT_VALUE, timeoutValue);
         sharedState.put(Constants.API_URL, config.APIUrl());
         sharedState.put(Constants.MITEK_FOLDER_URL, config.scriptFolderPath());
+        sharedState.put(Constants.RESPONSE, config.response());
         return goToNext().replaceSharedState(context.sharedState).build();
     }
 

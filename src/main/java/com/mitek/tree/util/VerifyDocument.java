@@ -7,6 +7,7 @@
 package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
+import com.sun.identity.idm.AMIdentity;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -17,6 +18,7 @@ import org.apache.http.util.EntityUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.NodeProcessException;
 import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.openam.core.CoreWrapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -24,6 +26,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
 import java.net.SocketTimeoutException;
+import java.util.*;
+
+import static org.forgerock.openam.auth.node.api.SharedStateConstants.REALM;
 
 public class VerifyDocument {
     private static final Logger logger = LoggerFactory.getLogger(VerifyDocument.class);
@@ -43,6 +48,25 @@ public class VerifyDocument {
         if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
             JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, selfieData);
             jsonResponse = verify(context, parentObj, accessToken);
+            String username = sharedState.get("username").asString();
+            if (username != null) {
+                try {
+                    CoreWrapper coreWrapper = new CoreWrapper();
+                    AMIdentity userIdentity = coreWrapper.getIdentity(username, context.sharedState.get(REALM).asString());
+                    if (userIdentity != null) {
+                        List<String> list = List.of(jsonResponse.toString());
+                        Set<String> verifyResponse = new HashSet<>(list);
+                        String response = sharedState.get(Constants.RESPONSE).asString();
+                        Map<String, Object> attributesMap = new HashMap<>();
+                        attributesMap.put(response, verifyResponse);
+                        userIdentity.setAttributes(attributesMap);
+                        userIdentity.store();
+                    }
+                } catch (Exception e) {
+                    logger.error(e.getMessage());
+                    throw new NodeProcessException("Exception is: " + e);
+                }
+            }
             responseCode = sharedState.get(Constants.VERIFY_RESPONSE_CODE).asInteger();
             if (responseCode == 400 || responseCode == 401 || responseCode == 403 || responseCode == 408
                     || responseCode == 415 || responseCode == 500 || responseCode == 502 || responseCode == 503

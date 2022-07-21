@@ -45,4 +45,5 @@ public final class Constants {
     public static final String TIMEOUT_VALUE = "timeout_value";
     public static final String API_URL = "api_url";
     public static final String VERIFY_RESPONSE_CODE = "verify_response_code";
+    public static final String RESPONSE = "response";
 }

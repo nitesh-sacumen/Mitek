@@ -35,8 +35,8 @@ public class Review implements Node {
 
     private static final String BUNDLE = "com/mitek/tree/nodes/Review";
     private static final Logger logger = LoggerFactory.getLogger(Review.class);
-    private AccessToken accessToken;
-    private VerifyDocument verifyDocument;
+    AccessToken accessToken;
+    VerifyDocument verifyDocument;
 
     /**
      * Configuration for the node.

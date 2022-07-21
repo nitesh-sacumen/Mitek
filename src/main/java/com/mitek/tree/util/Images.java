@@ -17,7 +17,7 @@ public class Images {
         JSONObject configuration = new JSONObject();
         JSONObject verifications = new JSONObject();
         verifications.put("faceComparison", true);
-        //verifications.put("faceLiveness", true);
+        verifications.put("faceLiveness", true);
         configuration.put("verifications", verifications);
         return configuration;
     }
