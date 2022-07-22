@@ -4,7 +4,7 @@
 
 ## Installation
 
-The Mitek-Auth tree nodes are packaged as a jar file and the latest release can be download [here](https://github.com/Enzoic/forgerock/releases/latest).
+The Mitek-Auth tree nodes are packaged as a jar file and the latest release can be download [here](https://github.com/nitesh-sacumen/Mitek).
  Once downloaded, copy the jar file to the ../web-container/webapps/openam/WEB-INF/lib
  
 ## Steps
@@ -39,17 +39,6 @@ This node will capture front image of document.
 This node will display consent message to user.
 ```
 
-### Retry Limit Decision
-```js
-Applies retry if verfication response code is 500. This is a built in ForgeRock Node 
-```
-
-Configuration is:
-```js
-* Retry Limit : The number of times to allow a retry.
-```
-![retry](https://user-images.githubusercontent.com/20396535/57918264-0849a000-78b4-11e9-905f-78ef61b88986.PNG)
-
 
 ### Mitek Configuration
 ```js
@@ -58,16 +47,31 @@ This node will get configuration detail while set up nodes.
 
 Configuration is:
 ```js
-* Api url : URL to connect with Mitek SDK
+* Api url
 
-* Api client id : Client id for http request authentication.
+* client id
 
-* Api client secret : Client secret for http request authentication.
+* client secret 
 
-* Scope : Scope for http request.
+* Consent Data
+
+* Grant Type
+
+* Retake Count
+
+* Retry Count
+
+* Timeout Value
+
+* Mitek SDK path
+
+* Response
+
+* Scope
+
 ```
+<img width="89" alt="Picture 2" src="https://user-images.githubusercontent.com/106667867/180420260-f5fbc2fc-4510-43a6-984a-c59a285c8db4.png">
 
-<img width="263" alt="Screenshot 2022-07-05 at 5 09 34 PM" src="https://user-images.githubusercontent.com/106667867/177319545-5de3be69-504c-4a41-8533-29ffe9dbb780.png">
 
 
 ### Passport node
