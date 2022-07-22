@@ -5,15 +5,21 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mitek.tree.config.Constants;
 import com.mitek.tree.nodes.Review;
 import com.mitek.tree.util.AccessToken;
+import com.mitek.tree.util.HttpConnectionClient;
+import com.mitek.tree.util.Images;
 import com.mitek.tree.util.VerifyDocument;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
+import com.sun.identity.idm.AMIdentity;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
 import org.forgerock.openam.auth.node.api.NodeProcessException;
 import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.openam.core.CoreWrapper;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,6 +46,11 @@ public class ReviewITTest {
     String wireMockPort;
 
 
+    @Mock
+    CoreWrapper coreWrapper;
+
+
+
     @BeforeMethod
     public void before() {
         wireMockRule = new WireMockRule(wireMockConfig().dynamicPort());
@@ -51,7 +62,7 @@ public class ReviewITTest {
 
     @Test
     public void testReviewWithWaitOutcome() throws NodeProcessException {
-        //review = new Review(new AccessToken(),new VerifyDocument());
+        review = new Review(new AccessToken(new HttpConnectionClient()),new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper));
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse().withBody("{\n" +
                                 "  \"access_token\" :\"test123\"\n" +
@@ -60,7 +71,6 @@ public class ReviewITTest {
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",true))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-
         HiddenValueCallback hcb1 = new HiddenValueCallback("front");
         HiddenValueCallback hcb2 = new HiddenValueCallback("selfie");
         HiddenValueCallback hcb3 = new HiddenValueCallback("passport");
@@ -87,7 +97,7 @@ public class ReviewITTest {
 
     @Test
     public void testReviewWithNullAcccessToken(){
-        //review = new Review(new AccessToken(),new VerifyDocument());
+        review = new Review(new AccessToken(new HttpConnectionClient()),new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper));
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse().withBody("{}")
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
@@ -137,7 +147,8 @@ public class ReviewITTest {
                 field(Constants.GRANT_TYPE, "testGrant"),
                 field(Constants.SCOPE, "test"),
                 field(Constants.API_URL,"http://localhost:"+wireMockPort),
-                field(Constants.TIMEOUT_VALUE,30)));
+                field(Constants.TIMEOUT_VALUE,30),
+                field("realm","testRealm")));
     }
 
     private String response(String processingStatus,boolean isAuthenticated){

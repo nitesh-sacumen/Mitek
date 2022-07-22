@@ -3,6 +3,7 @@ package com.mitek.tree;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.util.HttpConnectionClient;
 import org.forgerock.json.JsonValue;
 import com.mitek.tree.util.AccessToken;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
@@ -48,6 +49,7 @@ public class AccessTokenTest {
 
     @Test
     public void testGetAccessTokenWithSucccess() throws NodeProcessException {
+        accessToken = new AccessToken(new HttpConnectionClient());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse().withBody("{\n" +
                                 "  \"access_token\" :\"test123\"\n" +
@@ -59,6 +61,7 @@ public class AccessTokenTest {
 
     @Test
     public void testGetAccessTokenWithFailure() throws NodeProcessException {
+        accessToken = new AccessToken(new HttpConnectionClient());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/connect/token"))
                 .willReturn(aResponse()
                         .withStatus(400)));

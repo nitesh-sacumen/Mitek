@@ -39,7 +39,7 @@ public class VerificationOptionsTest {
         TreeContext treeContext = buildThreeContext(Collections.emptyList(),false);
         Action action = verificationOptions.process(treeContext);
         int callbacks  = action.callbacks.size();
-        Assert.assertEquals(callbacks,2);
+        Assert.assertEquals(callbacks,3);
     }
 
     @Test
@@ -47,7 +47,7 @@ public class VerificationOptionsTest {
         TreeContext treeContext = buildThreeContext(Collections.emptyList(),true);
         Action action = verificationOptions.process(treeContext);
         int callbacks  = action.callbacks.size();
-        Assert.assertEquals(callbacks,1);
+        Assert.assertEquals(callbacks,3);
     }
 
     @Test

@@ -34,11 +34,15 @@ public class VerifyDocument {
     private static final Logger logger = LoggerFactory.getLogger(VerifyDocument.class);
     HttpConnectionClient httpConnectionClient;
     Images images;
+    CoreWrapper coreWrapper;
+
+
 
     @Inject
-    public VerifyDocument(HttpConnectionClient httpConnectionClient, Images images) {
+    public VerifyDocument(HttpConnectionClient httpConnectionClient, Images images,CoreWrapper coreWrapper) {
         this.httpConnectionClient = httpConnectionClient;
         this.images = images;
+        this.coreWrapper = coreWrapper;
     }
 
     public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) throws NodeProcessException {
@@ -51,7 +55,6 @@ public class VerifyDocument {
             String username = sharedState.get("username").asString();
             if (username != null) {
                 try {
-                    CoreWrapper coreWrapper = new CoreWrapper();
                     AMIdentity userIdentity = coreWrapper.getIdentity(username, context.sharedState.get(REALM).asString());
                     if (userIdentity != null) {
                         List<String> list = List.of(jsonResponse.toString());

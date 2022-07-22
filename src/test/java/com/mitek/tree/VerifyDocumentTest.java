@@ -3,14 +3,20 @@ package com.mitek.tree;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.mitek.tree.config.Constants;
+import com.mitek.tree.util.HttpConnectionClient;
+import com.mitek.tree.util.Images;
 import com.mitek.tree.util.VerifyDocument;
+import com.sun.identity.idm.AMIdentity;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
 import org.forgerock.openam.auth.node.api.NodeProcessException;
 import org.forgerock.openam.auth.node.api.TreeContext;
+import org.forgerock.openam.core.CoreWrapper;
 import org.junit.After;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,6 +43,13 @@ public class VerifyDocumentTest {
 
     String wireMockPort;
 
+    @Mock
+    CoreWrapper coreWrapper;
+
+    @Mock
+    AMIdentity amIdentity;
+
+
 
     @BeforeMethod
     public void before() {
@@ -48,10 +61,12 @@ public class VerifyDocumentTest {
 
     @Test
     public void testVerifyWithFailedProcessingStatus() throws NodeProcessException {
+        verifyDocument = new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper);
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Failed",false))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
+        Mockito.when(coreWrapper.getIdentity("demo","test")).thenReturn(amIdentity);
         verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
         JsonValue jsonValue = treeContext.sharedState;
         Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_retry");
@@ -59,6 +74,8 @@ public class VerifyDocumentTest {
 
     @Test
     public void testVerifyWithFailedProcessingStatusAndAuthenticated() throws NodeProcessException {
+        verifyDocument = new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper);
+
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Failed",true))
@@ -70,6 +87,8 @@ public class VerifyDocumentTest {
 
     @Test
     public void testVerifyWithSuccessProcessingStatus() throws NodeProcessException {
+        verifyDocument = new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper);
+
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",true))
@@ -81,6 +100,8 @@ public class VerifyDocumentTest {
 
     @Test
     public void testVerifyWithSuccessProcessingStatusAndUnAuthenicated() throws NodeProcessException {
+        verifyDocument = new VerifyDocument(new HttpConnectionClient(),new Images(),coreWrapper);
+
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",false))

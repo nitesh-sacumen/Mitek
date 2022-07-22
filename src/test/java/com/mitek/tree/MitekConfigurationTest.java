@@ -44,7 +44,7 @@ public class MitekConfigurationTest {
             mitekConfiguration.process(treeContext);
         });
 
-        String expectedMessage = "Invalid credentials!!";
+        String expectedMessage = "Invalid/Missing credentials!!";
         String actualMessage = exception.getMessage();
         Assert.assertEquals(actualMessage,expectedMessage);
     }
@@ -62,6 +62,7 @@ public class MitekConfigurationTest {
         Mockito.when(config.timeoutValue()).thenReturn(3000);
         Mockito.when(config.consentData()).thenReturn("consent data");
         Mockito.when(config.scriptFolderPath()).thenReturn("/home");
+        Mockito.when(config.response()).thenReturn("json");
 
         TreeContext treeContext = buildThreeContext(Collections.emptyList());
 
