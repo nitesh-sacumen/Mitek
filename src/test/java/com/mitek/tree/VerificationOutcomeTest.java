@@ -33,28 +33,27 @@ public class VerificationOutcomeTest {
 
     @Test
     public void testVerificationOutcomeWithSuccessResult() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList(),Constants.VERIFICATION_SUCCESS);
+        TreeContext treeContext = buildThreeContext(Collections.emptyList(), Constants.VERIFICATION_SUCCESS);
         Action action = verificationOutcome.process(treeContext);
-        String outcome  = action.outcome;
-        Assert.assertEquals(outcome,"SUCCESS");
+        String outcome = action.outcome;
+        Assert.assertEquals(outcome, "SUCCESS");
     }
 
     @Test
     public void testVerificationOutcomeWithFailureResult() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList(),Constants.VERIFICATION_FAILURE);
+        TreeContext treeContext = buildThreeContext(Collections.emptyList(), Constants.VERIFICATION_FAILURE);
         Action action = verificationOutcome.process(treeContext);
-        String outcome  = action.outcome;
-        Assert.assertEquals(outcome,"FAILURE");
+        String outcome = action.outcome;
+        Assert.assertEquals(outcome, "FAILURE");
     }
 
     @Test
     public void testVerificationOutcomeWithRetryResult() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList(),Constants.VERIFICATION_RETRY);
+        TreeContext treeContext = buildThreeContext(Collections.emptyList(), Constants.VERIFICATION_RETRY);
         Action action = verificationOutcome.process(treeContext);
-        String outcome  = action.outcome;
-        Assert.assertEquals(outcome,"RETRY");
+        String outcome = action.outcome;
+        Assert.assertEquals(outcome, "RETRY");
     }
-
 
 
     private TreeContext buildThreeContext(List<Callback> callbacks, String verificationResult) {
@@ -70,6 +69,6 @@ public class VerificationOutcomeTest {
                 field(Constants.GRANT_TYPE, "testGrant"),
                 field(Constants.SCOPE, "test"),
                 field(Constants.CONSENT_DATA, "terms and condition"),
-                field(Constants.VERIFICATION_RESULT,verificationResult)));
+                field(Constants.VERIFICATION_RESULT, verificationResult)));
     }
 }

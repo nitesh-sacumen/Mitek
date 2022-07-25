@@ -36,18 +36,10 @@ public class VerificationOptionsTest {
 
     @Test
     public void testVerificationOptionsCallbackWithCallbackIsNotPresent() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList(),false);
+        TreeContext treeContext = buildThreeContext(Collections.emptyList());
         Action action = verificationOptions.process(treeContext);
-        int callbacks  = action.callbacks.size();
-        Assert.assertEquals(callbacks,3);
-    }
-
-    @Test
-    public void testVerificationOptionsWithRefershTrue() throws NodeProcessException {
-        TreeContext treeContext = buildThreeContext(Collections.emptyList(),true);
-        Action action = verificationOptions.process(treeContext);
-        int callbacks  = action.callbacks.size();
-        Assert.assertEquals(callbacks,3);
+        int callbacks = action.callbacks.size();
+        Assert.assertEquals(callbacks, 3);
     }
 
     @Test
@@ -59,9 +51,9 @@ public class VerificationOptionsTest {
         cbList.add(ccb);
         String[] submitButton = {"Next"};
         cbList.add(new ConfirmationCallback(0, submitButton, 0));
-        TreeContext treeContext = buildThreeContext(cbList,false);
+        TreeContext treeContext = buildThreeContext(cbList);
         Action action = verificationOptions.process(treeContext);
-        Assert.assertEquals(treeContext.sharedState.get(Constants.VERIFICATION_CHOICE).asString(),Constants.PASSPORT_VERIFICATION_OPTION);
+        Assert.assertEquals(treeContext.sharedState.get(Constants.VERIFICATION_CHOICE).asString(), Constants.PASSPORT_VERIFICATION_OPTION);
         Assert.assertNotNull(action);
     }
 
@@ -74,9 +66,9 @@ public class VerificationOptionsTest {
         cbList.add(ccb);
         String[] submitButton = {"Next"};
         cbList.add(new ConfirmationCallback(0, submitButton, 0));
-        TreeContext treeContext = buildThreeContext(cbList,false);
+        TreeContext treeContext = buildThreeContext(cbList);
         Action action = verificationOptions.process(treeContext);
-        Assert.assertEquals(treeContext.sharedState.get(Constants.VERIFICATION_CHOICE).asString(),Constants.DOCUMENT_VERIFICATION_OPTION);
+        Assert.assertEquals(treeContext.sharedState.get(Constants.VERIFICATION_CHOICE).asString(), Constants.DOCUMENT_VERIFICATION_OPTION);
         Assert.assertNotNull(action);
     }
 
@@ -89,30 +81,29 @@ public class VerificationOptionsTest {
         cbList.add(ccb);
         String[] submitButton = {"Next"};
         cbList.add(new ConfirmationCallback(0, submitButton, 0));
-        TreeContext treeContext = buildThreeContext(cbList,false);
+        TreeContext treeContext = buildThreeContext(cbList);
         Exception exception = Assert.expectThrows(NodeProcessException.class, () -> {
             verificationOptions.process(treeContext);
         });
 
         String expectedMessage = "Exception is: No option selected!!";
         String actualMessage = exception.getMessage();
-        Assert.assertEquals(actualMessage,expectedMessage);
+        Assert.assertEquals(actualMessage, expectedMessage);
     }
 
-    private TreeContext buildThreeContext(List<Callback> callbacks,boolean isRefereshVerification) {
-        return new TreeContext(retrieveSharedState(isRefereshVerification), json(object()),
+    private TreeContext buildThreeContext(List<Callback> callbacks) {
+        return new TreeContext(retrieveSharedState(), json(object()),
                 new ExternalRequestContext.Builder().build(), callbacks
                 , Optional.of("mockUserId"));
     }
 
 
-    private JsonValue retrieveSharedState(boolean isRefereshVerification) {
+    private JsonValue retrieveSharedState() {
         return json(object(field(USERNAME, "demo"),
                 field(Constants.CLIENT_ID, "clientID"),
                 field(Constants.CLIENT_SECRET, "secret"),
                 field(Constants.GRANT_TYPE, "testGrant"),
                 field(Constants.SCOPE, "test"),
-                field(Constants.CONSENT_DATA, "terms and condition"),
-                field(Constants.IS_VERIFICATION_REFRESH,isRefereshVerification)));
+                field(Constants.CONSENT_DATA, "terms and condition")));
     }
 }

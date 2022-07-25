@@ -9,7 +9,6 @@ import com.mitek.tree.util.HttpConnectionClient;
 import com.mitek.tree.util.Images;
 import com.mitek.tree.util.VerifyDocument;
 import com.sun.identity.authentication.callbacks.HiddenValueCallback;
-import com.sun.identity.idm.AMIdentity;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openam.auth.node.api.Action;
 import org.forgerock.openam.auth.node.api.ExternalRequestContext;
@@ -19,10 +18,10 @@ import org.forgerock.openam.core.CoreWrapper;
 import org.junit.Rule;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import javax.security.auth.callback.Callback;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.openam.auth.node.api.SharedStateConstants.USERNAME;
 import static org.mockito.MockitoAnnotations.initMocks;
 

@@ -49,7 +49,7 @@ public class ConsentTest {
     }
 
     @Test
-    public void testCaptureBackWithCallbacksWhenAllCallbacksPresent() throws NodeProcessException {
+    public void testConsentWithCallbacksWhenAllCallbacksPresent() throws NodeProcessException {
         List<Callback> cbList = new ArrayList<>();
         String[] choices = {"Next"};
         cbList.add(new ConfirmationCallback(0, choices, 0));
