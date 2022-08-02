@@ -1,6 +1,5 @@
 package com.mitek.tree.util;
 
-import com.mitek.tree.config.Constants;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -35,7 +34,7 @@ public class Images {
         JSONObject data, parentObj, obj, backDataObject;
         JSONArray images, evidence;
         String[] backImageArray;
-        String[] imageData = passportData.startsWith(Constants.BASE64_STARTS_WITH) ? passportData.split(",") : frontData.split(",");
+        String[] imageData = !passportData.equals("") ? passportData.split(",") : frontData.split(",");
         data = new JSONObject();
         data.put("data", imageData[1]);
         images = new JSONArray();
@@ -44,9 +43,9 @@ public class Images {
         parentObj = new JSONObject();
         obj = new JSONObject();
         obj.put("type", "IdDocument");
-        if (backImageCode != null && !backImageCode.startsWith("*")) {
+        if (!backImageCode.equals("") && !backImageCode.startsWith("*")) {
             images.put(getBackImageObject(backImageCode));
-        } else if (backData != null) {
+        } else if (!backData.equals("")) {
             backImageArray = backData.split(",");
             backDataObject = new JSONObject();
             backDataObject.put("data", backImageArray[1]);
@@ -54,7 +53,7 @@ public class Images {
         }
         obj.put("images", images);
         evidence.put(obj);
-        if (selfieData.startsWith(Constants.BASE64_STARTS_WITH)) {
+        if (!selfieData.equals("")) {
             evidence.put(getSelfieObject(selfieData));
             parentObj.put("configuration", getSelfieConfigurationObject());
         }

@@ -76,11 +76,23 @@ public class Review implements Node {
                 return goTo(ReviewOutcome.Retake).replaceSharedState(sharedState).build();
             } else {
                 logger.info("Submitting image.....");
-                String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
-                String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
-                String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
-                String backData = context.getCallbacks(HiddenValueCallback.class).get(4).getValue();
-                String backImageCode = null;
+                String frontData = "";
+                if (context.getCallbacks(HiddenValueCallback.class).get(1).getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+                    frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
+                }
+                String selfieData = "";
+                if (context.getCallbacks(HiddenValueCallback.class).get(2).getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+                    selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
+                }
+                String passportData = "";
+                if (context.getCallbacks(HiddenValueCallback.class).get(3).getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+                    passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
+                }
+                String backData = "";
+                if (context.getCallbacks(HiddenValueCallback.class).get(4).getValue().startsWith(Constants.BASE64_STARTS_WITH)) {
+                    backData = context.getCallbacks(HiddenValueCallback.class).get(4).getValue();
+                }
+                String backImageCode = "";
                 if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
                     backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
                 }

@@ -48,7 +48,7 @@ public class VerifyDocument {
         JsonValue sharedState = context.sharedState;
         JSONObject jsonResponse;
         Integer responseCode;
-        if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
+        if (!frontData.equals("") || !passportData.equals("")) {
             JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, backData, selfieData);
             jsonResponse = verify(context, parentObj, accessToken);
             String username = sharedState.get("username").asString();
