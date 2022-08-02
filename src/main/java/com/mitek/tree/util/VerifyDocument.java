@@ -37,20 +37,19 @@ public class VerifyDocument {
     CoreWrapper coreWrapper;
 
 
-
     @Inject
-    public VerifyDocument(HttpConnectionClient httpConnectionClient, Images images,CoreWrapper coreWrapper) {
+    public VerifyDocument(HttpConnectionClient httpConnectionClient, Images images, CoreWrapper coreWrapper) {
         this.httpConnectionClient = httpConnectionClient;
         this.images = images;
         this.coreWrapper = coreWrapper;
     }
 
-    public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, TreeContext context) throws NodeProcessException {
+    public void verify(String accessToken, String frontData, String selfieData, String passportData, String backImageCode, String backData, TreeContext context) throws NodeProcessException {
         JsonValue sharedState = context.sharedState;
         JSONObject jsonResponse;
         Integer responseCode;
         if (frontData.startsWith(Constants.BASE64_STARTS_WITH) || passportData.startsWith(Constants.BASE64_STARTS_WITH)) {
-            JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, selfieData);
+            JSONObject parentObj = images.createParentObject(passportData, frontData, backImageCode, backData, selfieData);
             jsonResponse = verify(context, parentObj, accessToken);
             String username = sharedState.get("username").asString();
             if (username != null) {

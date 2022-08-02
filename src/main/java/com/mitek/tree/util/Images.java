@@ -31,9 +31,10 @@ public class Images {
         return selfieObject;
     }
 
-    public JSONObject createParentObject(String passportData, String frontData, String backImageCode, String selfieData) {
-        JSONObject data, parentObj, obj;
+    public JSONObject createParentObject(String passportData, String frontData, String backImageCode, String backData, String selfieData) {
+        JSONObject data, parentObj, obj, backDataObject;
         JSONArray images, evidence;
+        String[] backImageArray;
         String[] imageData = passportData.startsWith(Constants.BASE64_STARTS_WITH) ? passportData.split(",") : frontData.split(",");
         data = new JSONObject();
         data.put("data", imageData[1]);
@@ -43,8 +44,13 @@ public class Images {
         parentObj = new JSONObject();
         obj = new JSONObject();
         obj.put("type", "IdDocument");
-        if (backImageCode != null) {
+        if (backImageCode != null && !backImageCode.startsWith("*")) {
             images.put(getBackImageObject(backImageCode));
+        } else if (backData != null) {
+            backImageArray = backData.split(",");
+            backDataObject = new JSONObject();
+            backDataObject.put("data", backImageArray[1]);
+            images.put(backDataObject);
         }
         obj.put("images", images);
         evidence.put(obj);

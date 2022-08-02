@@ -67,7 +67,7 @@ public class VerifyDocumentTest {
                 .willReturn(aResponse().withBody(response("Failed",false))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
         Mockito.when(coreWrapper.getIdentity("demo","test")).thenReturn(amIdentity);
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
+        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,ImageCode","data:back,ImageData",treeContext);
         JsonValue jsonValue = treeContext.sharedState;
         Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_retry");
     }
@@ -80,7 +80,7 @@ public class VerifyDocumentTest {
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Failed",true))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
+        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,ImageCode","data:back,ImageData",treeContext);
         JsonValue jsonValue = treeContext.sharedState;
         Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_retry");
     }
@@ -93,7 +93,7 @@ public class VerifyDocumentTest {
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",true))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
+        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,ImageCode","data:back,ImageData",treeContext);
         JsonValue jsonValue = treeContext.sharedState;
         Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_success");
     }
@@ -106,7 +106,7 @@ public class VerifyDocumentTest {
         wireMockRule.stubFor(post(WireMock.urlPathMatching("/api/verify/v2/dossier"))
                 .willReturn(aResponse().withBody(response("Successful",false))
                         .withStatus(200).withHeader("Content-Type", "application/x-www-form-urlencoded")));
-        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,Image",treeContext);
+        verifyDocument.verify("test123", "data:front,Image", "data:selfie,Image", "data:passport,Image","data:back,ImageCode","data:back,ImageData",treeContext);
         JsonValue jsonValue = treeContext.sharedState;
         Assert.assertEquals(jsonValue.get(Constants.VERIFICATION_RESULT).asString(),"verification_failure");
     }

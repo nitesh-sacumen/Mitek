@@ -79,13 +79,14 @@ public class Review implements Node {
                 String frontData = context.getCallbacks(HiddenValueCallback.class).get(1).getValue();
                 String selfieData = context.getCallbacks(HiddenValueCallback.class).get(2).getValue();
                 String passportData = context.getCallbacks(HiddenValueCallback.class).get(3).getValue();
+                String backData = context.getCallbacks(HiddenValueCallback.class).get(4).getValue();
                 String backImageCode = null;
                 if (sharedState.get(Constants.PDF_417_CODE).isNotNull()) {
                     backImageCode = sharedState.get(Constants.PDF_417_CODE).asString();
                 }
                 String accessTokenResult = accessToken.getAccessToken(context);
                 if (accessTokenResult != null) {
-                    verifyDocument.verify(accessTokenResult, frontData, selfieData, passportData, backImageCode, context);
+                    verifyDocument.verify(accessTokenResult, frontData, selfieData, passportData, backImageCode, backData, context);
                 }
                 return goTo(ReviewOutcome.Wait).replaceSharedState(sharedState).build();
             }

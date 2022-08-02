@@ -1,5 +1,7 @@
 package com.mitek.tree.util;
 
+import com.mitek.tree.config.Constants;
+
 /**
  * @author Sacumen(www.sacumen.com)
  * This class contains js script which will use to get back side image of document.
@@ -21,21 +23,18 @@ public class CaptureBackScript {
                 "input.setAttribute('id', 'integratorDocTypeInput');\r\n" +
                 "input.setAttribute('value','" + verificationChoice + "');\r\n" +
                 "document.body.appendChild(input);\r\n" +
-
                 "var capturedTimeout = document.createElement('input');\n" +
                 "capturedTimeout.id = 'capturedTimeout';\n" +
                 "capturedTimeout.type = 'hidden';\n" +
                 "capturedTimeout.value = '';\n" +
                 "document.body.appendChild(capturedTimeout);\n" +
-
                 "var interval = setInterval(function () {\n" +
                 "var codeData = document.getElementById('capturedBackImageCode').value;\n" +
-                "var result = codeData.includes('*');\n" +
+                "var backData = document.getElementById('capturedBackImage').src;\n" +
+                "var result = backData.startsWith('" + Constants.BASE64_STARTS_WITH + "');\n" +
                 "if (result === true) {\n" +
                 "document.getElementById('captureBackResponse').value = codeData;\n" +
-                "var backData = document.getElementById('capturedBackImage').src;\n" +
                 "document.getElementById('captureBack').value = backData;\n" +
-
                 "if (document.contains(document.getElementById('capturedImageContainer'))) {\n" +
                 "var capturedImageContainer=document.getElementById('capturedImageContainer');\n" +
                 "var backImageData = document.createElement('input');\n" +
@@ -50,7 +49,6 @@ public class CaptureBackScript {
                 "f2();\n" +
                 "}\n" +
                 "}, 500);\n" +
-
                 "function f2() {\n" +
                 "clearInterval(interval);\n" +
                 "document.getElementById('loginButton_0').click();\n" +
