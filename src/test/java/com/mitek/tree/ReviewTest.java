@@ -68,16 +68,26 @@ public class ReviewTest {
     @Test
     public void testReviewWithIsRetakeFalse() throws NodeProcessException {
         List<Callback> cbList = new ArrayList<>();
-        HiddenValueCallback hcb = new HiddenValueCallback("isRetake");
-        hcb.setValue("false");
-        cbList.add(hcb);
-        cbList.add(new HiddenValueCallback("front"));
-        cbList.add(new HiddenValueCallback("selfie"));
-        cbList.add(new HiddenValueCallback("passport"));
-        cbList.add(new HiddenValueCallback("back"));
+        HiddenValueCallback hcb1= new HiddenValueCallback("isRetake");
+        HiddenValueCallback hcb2 = new HiddenValueCallback("front");
+        HiddenValueCallback hcb3 = new HiddenValueCallback("selfie");
+        HiddenValueCallback hcb4 = new HiddenValueCallback("passport");
+        HiddenValueCallback hcb5 = new HiddenValueCallback("back");
+        hcb1.setValue("false");
+        hcb2.setValue("data:front");
+        hcb3.setValue("data:selfie");
+        hcb4.setValue("data:passport");
+        hcb5.setValue("data:back");
+        cbList.add(hcb1);
+        cbList.add(hcb2);
+        cbList.add(hcb3);
+        cbList.add(hcb4);
+        cbList.add(hcb5);
         TreeContext treeContext = buildThreeContext(cbList);
         Action action = review.process(treeContext);
+        String outcome = action.outcome;
         Assert.assertNotNull(action);
+        Assert.assertEquals(outcome,"Wait");
     }
 
 
