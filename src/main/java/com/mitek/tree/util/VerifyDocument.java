@@ -8,6 +8,7 @@ package com.mitek.tree.util;
 
 import com.mitek.tree.config.Constants;
 import com.sun.identity.idm.AMIdentity;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -65,8 +66,7 @@ public class VerifyDocument {
                         userIdentity.store();
                     }
                 } catch (Exception e) {
-                    logger.error(e.getMessage());
-                    throw new NodeProcessException("Exception is: " + e);
+                    logger.error(ExceptionUtils.getStackTrace(e));
                 }
             }
             responseCode = sharedState.get(Constants.VERIFY_RESPONSE_CODE).asInteger();

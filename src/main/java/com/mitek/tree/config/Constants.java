@@ -27,7 +27,7 @@ public final class Constants {
     public static final String VERIFICATION_SUCCESS = "verification_success";
     public static final String VERIFICATION_FAILURE = "verification_failure";
     public static final String VERIFICATION_RETRY = "verification_retry";
-    public static final String BASE64_STARTS_WITH = "data";
+    public static final String BASE64_STARTS_WITH = "data:";
     public static final String VERIFICATION_REFERENCE_ID = "verification_reference_id";
     public static final String RETAKE_COUNT = "retake_count";
     public static final String IS_RETAKE = "isRetake";
