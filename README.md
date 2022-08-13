@@ -1,6 +1,5 @@
 # Mitek Auth Tree Node
 
-## Mitek
 
 ## Installation
 
